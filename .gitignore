@@ -64,7 +64,6 @@ db.sqlite3-journal
 # Flask stuff:
 instance/
 .webassets-cache
-migrations/
 
 # Scrapy stuff:
 .scrapy
@@ -206,3 +205,4 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+/migrations/
