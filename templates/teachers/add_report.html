@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+    <p class="uk-article-meta"><strong>Преподаватель: </strong>{{ teacher.full_name }}</p>
+<form action="{{ url_for('teachers.send_report', id=teacher.id) }}" method="post">
+    {{ form.csrf_token }}
+    <div uk-grid>
+        <div class="uk-width-1-2">
+            <label class="uk-form-label">
+                {{ form.subject_id.label }}
+            </label>
+            <div class="uk-form-controls">
+                {{ form.subject_id(class='uk-select uk-border-rounded') }}
+            </div>
+        </div>
+        <div class="uk-width-1-2">
+            <label class="uk-form-label">
+                {{ form.term.label }}
+            </label>
+            <div class="uk-form-controls">
+                {{ form.term(class='uk-select uk-border-rounded') }}
+            </div>
+        </div>
+    </div>
+
+    <div uk-grid>
+        <div class="uk-width-1-5">
+            <label class="uk-form-label">
+                {{ form.total.label }}
+                {{ form.total(class='uk-input uk-border-rounded') }}
+            </label>
+        </div>
+        <div class="uk-width-1-5">
+            <label class="uk-form-label">
+                {{ form.got_best.label }}
+                {{ form.got_best(class='uk-input uk-border-rounded') }}
+            </label>
+        </div>
+        <div class="uk-width-1-5">
+            <label class="uk-form-label">
+                {{ form.got_good.label }}
+                {{ form.got_good(class='uk-input uk-border-rounded') }}
+            </label>
+        </div>
+        <div class="uk-width-1-5">
+            <label class="uk-form-label">
+                {{ form.got_avg.label }}
+                {{ form.got_avg(class='uk-input uk-border-rounded') }}
+            </label>
+        </div>
+        <div class="uk-width-1-5">
+            <label class="uk-form-label">
+                {{ form.got_bad.label }}
+                {{ form.got_bad(class='uk-input uk-border-rounded') }}
+            </label>
+        </div>
+    </div>
+    <div class="uk-margin-large">
+        {{ form.submit (class='uk-button uk-button-primary uk-border-rounded')}}
+    </div>
+</form>
+</div>
+</div>
+{% endblock %}

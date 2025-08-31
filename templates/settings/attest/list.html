@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title}}
+    <a href="{{ url_for('settings.attest_add') }}" class="uk-icon-button" uk-icon="plus" uk-tooltip="title: Добавить вид аттестации; pos: bottom"></a>
+</h2>
+{% if not exam_types %}
+<p>В базе отсутствуют виды аттестации.</p>
+{% else %}
+<table class="uk-table uk-table-small">
+    <tr>
+        <th>Вид аттестации</th>
+        <th>Протоколов</th>
+        <th>Действия</th>
+    </tr>
+    {% for et in exam_types %}
+    <tr>
+        <td>{{ et.name }}</td>
+        <td>{{ et.exam_type|count }}</td>
+        <td>
+            <a href="#" class="uk-icon-button" uk-icon="pencil" uk-tooltip="title: Редактировать; pos: bottom"></a>
+            <a href="{{ url_for('settings.attest_delete', id=et.id) }}" class="uk-icon-button uk-text-danger" uk-tooltip="title: Удалить; pos: bottom"><span uk-icon="trash"></span></a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

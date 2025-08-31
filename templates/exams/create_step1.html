@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+        <h2>{{title}} <span class="uk-text-muted">Шаг 1</span></h2>
+        <form action="{{url_for('exams.create_step1')}}" method="post" class="uk-form-stacked">
+            {{ form.csrf_token }}
+            <div class="uk-child-width-1-2" uk-grid>
+                <div>
+                    <div class="uk-margin">
+                        <label class="uk-form-label">{{ form.exam_type_id.label }}</label>
+                        <div class="uk-form-controls">
+                            {{ form.exam_type_id(class='uk-select uk-border-rounded') }}
+                            <span class="uk-text-small uk-text-muted">Вид промежуточной или итоговой аттестации</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="uk-margin">
+                        <label class="uk-form-label">{{ form.department_id.label }}</label>
+                        <div class="uk-form-controls">
+                            {{ form.department_id(class='uk-select uk-border-rounded') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div uk-grid>
+                <div class="uk-width-1-4">
+                    <div class="uk-margin">
+                        <label class="uk-form-label">{{ form.date.label }}</label>
+                        <div class="uk-form-controls">
+                            {{ form.date(class='uk-input uk-border-rounded') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-width-1-2">
+                    <div class="uk-margin">
+                        <label class="uk-form-label">{{ form.discipline.label }}</label>
+                        <div class="uk-form-controls">
+                            {{ form.discipline(class='uk-input uk-border-rounded') }}
+                            <span class="uk-text-small uk-text-muted">Предмет указывается именно так, как он указывается в учебном плане</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-width-1-4">
+                    <div class="uk-margin">
+                        <label class="uk-form-label">{{ form.commission.label }}</label>
+                        <div class="uk-form-controls">
+                            {{ form.commission(class='uk-select uk-border-rounded') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="uk-margin">
+                {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+            </div>
+        </form>
+{% endblock %}

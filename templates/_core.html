@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+
+{% endblock %}
+
+
+Поле формы:
+<div class="uk-margin">
+    <label class="uk-form-label">{{ form..label }}</label>
+    <div class="uk-form-controls">
+        {{ form.(class='uk-input uk-border-rounded') }}
+        <span class="uk-text-small uk-text-muted"></span>
+    </div>
+</div>
+
+
+Подтверждение отправки:
+<div class="uk-margin">
+    {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+</div>
+
+
+Аккордеон:
+<ul class="uk-accordion">
+    <li>
+        <a class="uk-accordion-title">Заголовок</a>
+        <div class="uk-accordion-content">
+            Содержимое
+        </div>
+    </li>
+</ul>
+
+
+Кнопка-ссылка:
+<a href="{{ url_for('teachers.edit', id=teacher.id) }}" class="uk-icon-button uk-button-default" uk-icon="pencil" uk-tooltip="title: Редактировать; pos: bottom"></a>

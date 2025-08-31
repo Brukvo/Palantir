@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h1 class="uk-text-center">Ой!</h1>
+<p class="uk-h3">{{ title }}</p>
+<p>Скорее всего, произошла ошибка при переходе по ссылке. Полный текст ошибки:
+    <code>{{ e_msg }}</code>
+</p>
+{% endblock %}

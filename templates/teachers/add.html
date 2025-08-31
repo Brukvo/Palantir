@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+        <h2>{{title}}</h2>
+        <form action="{{ url_for('teachers.add')}}" method="post">
+                {{ form.csrf_token }}
+
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.full_name.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.full_name(class='uk-input uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted">Полное имя преподавателя. Короткая форма будет сгенерирована автоматически</span>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.main_department_id.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.main_department_id(class='uk-select uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted">Основное отделение</span>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+            </div>
+
+        </form>
+{% endblock %}

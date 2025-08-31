@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / Преподаватели / {{super()}}{% endblock %}
+
+{% block content %}
+<div class="uk-inline">
+<h2>{{title}}&ensp;<a href="{{ url_for('teachers.edit', id=teacher.id) }}" class="uk-icon-button uk-button-default"
+        uk-icon="pencil" uk-tooltip="title: Редактировать; pos: bottom"></a>
+    <a href="{{ url_for('teachers.delete', id=teacher.id) }}" class="uk-icon-button uk-button-default uk-text-danger"
+        uk-icon="trash" uk-tooltip="title: Удалить; pos: bottom"></a>
+    <div class="uk-inline">
+        <button class="uk-button uk-button-primary uk-border-rounded" type="button">Добавить</button>
+        <div uk-dropdown>
+            <ul class="uk-nav uk-dropdown-nav">
+                <li class="uk-nav-header">Отчёт</li>
+                <li><a href="{{ url_for('teachers.send_report', id=teacher.id) }}">&ensp;по предмету</a></li>
+                {% if teacher.main_department_id %}<li><a href="{{ url_for('teachers.send_class_report', id=teacher.id) }}">&ensp;по классному руководству</a></li>{% endif %}
+                {#<li><a href="{{ url_for('teachers.send_report', id=teacher.id) }}">&ensp;по концерту</a></li>
+                <li><a href="{{ url_for('teachers.send_report', id=teacher.id) }}">&ensp;по конкурсу</a></li>#}
+                <li class="uk-nav-divider"></li>
+                <li><a href="{{ url_for('teachers.send_lecture', id=teacher.id) }}">Доклад</a></li>
+                <li><a href="{{ url_for('teachers.send_open_lesson', id=teacher.id) }}">Открытый урок</a></li>
+            </ul>
+        </div>
+    </div>
+</h2>
+{% if teacher.main_department_id %}<h4>Преподаватель отделения <a href="{{ url_for('settings.departments_view', id=teacher.main_department_id) }}"><b>{{ teacher.main_department.title }}</b></a></h4>{% endif %}
+</div>
+<ul uk-accordion="multiple: true">
+    {% if teacher.reports %}
+    <li>
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Отчёты за четверть и год по предметам</a>
+        <div class="uk-accordion-content">
+            {% if reports %}
+            <div uk-filter="target: .js-filter; animation: fade">
+                <table class="uk-table uk-table-small uk-table-hover">
+                    <thead>
+                        <caption>
+                            <ul class="uk-subnav uk-subnav-pill">
+                                <li class="uk-active" uk-filter-control><a href="#">все</a></li>
+                                <li uk-filter-control="filter: .term-1"><a href="#">I</a></li>
+                                <li uk-filter-control="filter: .term-2"><a href="#">II</a></li>
+                                <li uk-filter-control="filter: .term-3"><a href="#">III</a></li>
+                                <li uk-filter-control="filter: .term-4"><a href="#">IV</a></li>
+                                <li uk-filter-control="filter: .term-5"><a href="#">год</a></li>
+                            </ul>
+                        </caption>
+                        <tr>
+                            <th>Период</th>
+                            <th>Предмет</th>
+                            <th>Кол-во</th>
+                            <th>5</th>
+                            <th>4</th>
+                            <th>3</th>
+                            <th>2</th>
+                            <th>Кол.%</th>
+                            <th>Кач.%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr class="js-filter">
+                            <td class="term-{{report.term}}">{% if report.term in [1,2,3,4]
+                                %}{{ report.term }} ч.{% else %}год{% endif %}</td>
+                            <td class="term-{{report.term}}">{{ report.subject.title }}</td>
+                            <td class="term-{{report.term}}">{{ report.total }}</td>
+                            <td class="term-{{report.term}}">{% if report.got_best %}{{
+                                report.got_best }}{% else %}&mdash;{% endif %}</td>
+                            <td class="term-{{report.term}}">{% if report.got_good %}{{
+                                report.got_good }}{% else %}&mdash;{% endif %}</td>
+                            <td class="term-{{report.term}}">{% if report.got_avg %}{{
+                                report.got_avg }}{% else %}&mdash;{% endif %}</td>
+                            <td class="term-{{report.term}}">{% if report.got_bad %}{{
+                                report.got_bad }}{% else %}&mdash;{% endif %}</td>
+                            <td class="term-{{report.term}}">{{ report.quantity }}%</td>
+                            <td class="term-{{report.term}}">{{ report.quality }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            Нет отчётов по успеваемости
+            {% endif %}
+        </div>
+    </li>
+    {% endif %}
+
+    {% if teacher.class_reports %}
+    <li>
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Отчёты по классному руководству</a>
+        <div class="uk-accordion-content">
+            <table class="uk-table uk-table-small uk-table-hover">
+                <tr>
+                    <th>Период</th>
+                    <th>Уч.год</th>
+                    <th>Всего</th>
+                    <th>на 5</th>
+                    <th>на 4</th>
+                    <th>на 3</th>
+                    <th>на 2</th>
+                    <th>кол. %</th>
+                    <th>кач. %</th>
+                </tr>
+            {% for cr in class_reports %}
+            <tr>
+                <td>{% if cr.term in [1,2,3,4] %}{{ cr.term }} ч.{% else %}год{% endif %}</td>
+                <td>{{ cr.academic_year }}</td>
+                <td>{{ cr.total }}</td>
+                <td>{{ cr.got_best }}</td>
+                <td>{{ cr.got_good }}</td>
+                <td>{{ cr.got_avg }}</td>
+                <td>{{ cr.got_bad }}</td>
+                <td>{{ cr.quantity }}</td>
+                <td>{{ cr.quality }}</td>
+            </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </li>
+    {% endif %}
+
+
+
+
+    {% if teacher.lecture_items %}
+    <li>
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Методические доклады</a>
+        <div class="uk-accordion-content">
+            <table class="uk-table uk-table-small uk-table-striped">
+                <tr>
+                    <th>Период</th>
+                    <th>Уч. год</th>
+                    <th>Дата</th>
+                    <th>Название</th>
+                </tr>
+                {% for lecture in lectures %}
+                <tr>
+                    <td>{{ lecture.term }}ч.</td>
+                    <td>{{ lecture.academic_year }}</td>
+                    <td>{{ lecture.date.strftime('%d.%m.%Y') }}</td>
+                    <td>{{ lecture.title }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </li>
+    {% endif %}
+
+    {% if teacher.open_lesson_items %}
+    <li>
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Открытые уроки</a>
+        <div class="uk-accordion-content">
+        <table class="uk-table uk-table-small uk-table-striped uk-table-hover">
+            <tr>
+                <th>Год</th>
+                <th class="uk-table-shrink">Период</th>
+                <th class="uk-table-shrink">Дата</th>
+                <th>Тема</th>
+                <th>Ученик</th>
+            </tr>
+        {% for lesson in open_lessons %}
+            <tr>
+                <td class="uk-table-shrink">{{ lesson.academic_year }}</td>
+                <td>{{ lesson.term }}ч.</td>
+                <td>{{ lesson.date.strftime('%d.%m.%Y') }}</td>
+                <td>{{ lesson.title }}</td>
+                <td><a href="{{ url_for('students.view', id=lesson.student_id) }}">{{ lesson.student.short_name }}</a></td>
+            </tr>
+        {% endfor %}
+        </table>
+        </div>
+    </li>
+    {% endif %}
+{% if teacher.main_department_id %}
+    <li class="uk-open">
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Ученики преподавателя <span class="uk-text-muted">{{teacher.students|count}}</span></a>
+        <div class="uk-accordion-content">
+            <table class="uk-table uk-table-small uk-table-hover">
+                <thead>
+                    <tr>
+                        <th>Ученик</th>
+                        <th class="uk-text-center">Класс</th>
+                        <th class="uk-text-center" uk-tooltip="title: Соло / Коллектив / Всего; pos: top">Концертов</th>
+                        <th class="uk-text-center" uk-tooltip="title: Соло / Коллектив / Всего; pos: top">Конкурсов</th>
+                        <th class="uk-table-shrink" uk-tooltip="title: Общая сумма выступлений; pos: top">&sum;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    {% set total_concerts = student.concert_participations|count + student.ensemble_participations|count %}
+                    {% set total_contests = student.contest_participations|count + student.contest_ens_participations|count %}
+                    {% set total_performances = total_concerts + total_contests %}
+                    <tr>
+                        <td><a href="{{ url_for('students.view', id=student.id) }}">{{ student.short_name }}</a></td>
+                        <td class="uk-text-center"><span {%if student.is_deep_level %} class="uk-label uk-label-warning"{% endif %}>{{ student.class_level }}/{{ student.study_years }}</span></td>
+                        <td class="uk-text-center">{{ student.concert_participations|count }} / {{ student.ensemble_participations|count }} / <b>{{ total_concerts }}</b></td>
+                        <td class="uk-text-center">{{ student.contest_participations|count }} / {{ student.contest_ens_participations|count }} / <b>{{ total_contests }}</b></td>
+                        <td><span class="uk-text-bold {% if total_performances >= 3 %}uk-text-success{% elif total_performances == 2 %}uk-text-warning{% endif %}">{{ total_performances }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </li>
+    {% endif %}
+</ul>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title}}</h2>
+<p>Отделение: <b>{{dep.title}}</b>, количество учеников: <b>{{dep.students|count}}</b></p>
+<form action="{{ url_for('settings.department_report', id=dep.id) }}" method="post">
+{{form.csrf_token}}
+<div uk-grid>
+    <div class="uk-width-1-3">
+        <div class="uk-margin">
+    <label class="uk-form-label">{{ form.department_id.label }}</label>
+    <div class="uk-form-controls">
+        {{ form.department_id(class='uk-select uk-border-rounded') }}
+        <span class="uk-text-small uk-text-muted"></span>
+    </div>
+</div>
+    </div>
+    <div class="uk-width-1-6">
+        <div class="uk-margin">
+    <label class="uk-form-label">{{ form.got_best.label }}</label>
+    <div class="uk-form-controls">
+        {{ form.got_best(class='uk-input uk-border-rounded') }}
+        <span class="uk-text-small uk-text-muted"></span>
+    </div>
+</div>
+    </div>
+    <div class="uk-width-1-6">
+        <div class="uk-margin">
+    <label class="uk-form-label">{{ form.got_good.label }}</label>
+    <div class="uk-form-controls">
+        {{ form.got_good(class='uk-input uk-border-rounded') }}
+        <span class="uk-text-small uk-text-muted"></span>
+    </div>
+</div>
+    </div>
+    <div class="uk-width-1-6">
+        <div class="uk-margin">
+    <label class="uk-form-label">{{ form.got_avg.label }}</label>
+    <div class="uk-form-controls">
+        {{ form.got_avg(class='uk-input uk-border-rounded') }}
+        <span class="uk-text-small uk-text-muted"></span>
+    </div>
+</div>
+    </div>
+    <div class="uk-width-1-6">
+        <div class="uk-margin">
+    <label class="uk-form-label">{{ form.got_bad.label }}</label>
+    <div class="uk-form-controls">
+        {{ form.got_bad(class='uk-input uk-border-rounded') }}
+        <span class="uk-text-small uk-text-muted"></span>
+    </div>
+</div>
+    </div>
+</div>
+<div class="uk-margin">
+    {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+</div>
+</form>
+{% endblock %}
+

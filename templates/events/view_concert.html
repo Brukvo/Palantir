@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{concert.title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{concert.title}}
+    <a href="{{ url_for('events.concert_part_add', concert_id=concert.id) }}" class="uk-icon-button" uk-icon="user" uk-tooltip="title: Добавить участника; pos: bottom"></a>
+</h2>
+<div class="uk-child-width-1-3" uk-grid>
+    <div>
+        <p class="uk-text-center">{{ concert.academic_year }} учебный год, {{ concert.term }} четверть</p>
+    </div>
+    <div>
+        <p class="uk-text-center">{{ concert.date.strftime('%d.%m.%Y') }}, {{ concert.place }}</p>
+    </div>
+    <div>
+        <p class="uk-text-center">Ответственный: <a href="{{ url_for('teachers.view', id=concert.teacher_id) }}" uk-tooltip="title: {{concert.teacher.full_name}}; pos: bottom">{{ concert.teacher.short_name }}</a></p>
+    </div>
+</div>
+<h3>Участники концерта</h3>
+{% if concert.participations %}
+<table class="uk-table uk-table-small">
+    <tr>
+        <th>Участник</th>
+        <th>Преподаватель</th>
+        <th>&nbsp;</th>
+    </tr>
+    {% for p in concert.participations %}
+    <tr>
+        <td>
+            {% if p.student_id %}
+            <a href="{{ url_for('students.view', id=p.student_id)}}">{{ p.student.short_name }}</a>
+            {% else %}
+            {{ p.ensemble.name }} ({% for m in p.ensemble.members %}{{ m.short_name }}, {% endfor %})
+            {% endif %}
+        </td>
+        <td>
+            {% if p.student_id %}
+            <a href="{{ url_for('teachers.view', id=p.student.lead_teacher_id) }}">{{ p.student.lead_teacher.short_name }}</a>
+            {% else %}
+            <a href="{{ url_for('teachers.view', id=p.ensemble.teacher.short_name) }}">{{ p.ensemble.teacher.short_name }}</a>
+            {% endif %}
+        </td>
+        <td>
+            <a href="{{ url_for('events.concert_delete_participant', c_id=concert.id, p_id=p.id) }}" class="uk-icon-button" uk-icon="trash" uk-tooltip="title: Удалить участника; pos: bottom"></a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>В концерте пока никто не принимал участия.</p>
+{% endif %}
+{% endblock %}

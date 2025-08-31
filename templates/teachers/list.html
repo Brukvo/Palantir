@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+
+        <h2>{{ title }} <a href="{{ url_for('teachers.add') }}" class="uk-icon-button" uk-icon="plus" uk-tooltip="title: Добавить преподавателя; pos: bottom"></a></h2>
+        {% if not teachers %}
+        <p>В базе данных не зарегистрировано ни одного преподавателя</p>
+        {% else %}
+        <table class="uk-table uk-table-small uk-table-striped uk-table-hover">
+            <tr>
+                <th>Преподаватель</th>
+                <th>Отделение</th>
+                <th>Уч</th>
+                <th><span uk-tooltip="Методический доклад">Д</span></th>
+                <th><span uk-tooltip="Открытый урок">У</span></th>
+                <th>Действия</th>
+            </tr>
+            {% for teacher in teachers %}
+            <tr>
+                <td><a href="{{ url_for('teachers.view', id=teacher.id) }}">{{ teacher.full_name }}</a></td>
+                <td><a href="{{ url_for('settings.departments_view', id=teacher.main_department_id) }}">{{ teacher.main_department.title }}</a></td>
+                <td>{% if teacher.main_department_id %}{{ teacher.students|count }}{% endif %}</td>
+                <td><span class="{% if teacher.lecture_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span></td>
+                <td><span class="{% if teacher.open_lesson_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span></td>
+                <td>
+                    <a href="{{ url_for('teachers.edit', id=teacher.id) }}" class="uk-icon-button uk-button-default" uk-icon="pencil" uk-tooltip="title: Редактировать; pos: left"></a>
+                    <a href="{{ url_for('teachers.delete', id=teacher.id) }}" class="uk-icon-button uk-button-default uk-text-danger" uk-icon="trash" uk-tooltip="title: Удалить; pos: left"></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

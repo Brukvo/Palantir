@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{% block title %}Методический уголок{% endblock %}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/uikit.css') }}" />
+    <script src="{{ url_for('static', filename='js/uikit.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/uikit-icons.js') }}"></script>
+</head>
+
+<body class="uk-background-secondary">
+    <header class="uk-section uk-section-secondary uk-section-xsmall">
+        <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
+            <div class="uk-navbar-center">
+                <ul class="uk-navbar-nav">
+                    <li><a href="/"><span class="uk-icon uk-icon-image" style="background-image: url({{url_for('static', filename='images/favicon.png')}})"></span></a></li>
+                    {% if g.s %}<li><a href="{{ url_for('students.all') }}">Ученики</a></li>{% endif %}
+                    {% if g.t %}<li><a href="{{ url_for('teachers.all') }}">Преподаватели</a></li>{% endif %}
+                    <li><a href="{{ url_for('settings.departments_all')}}">Отделения</a></li>
+                    {% if g.s %}<li><a href="{{ url_for('students.ensembles_all') }}">Коллективы</a></li>{% endif %}
+                    {% if g.s %}<li><a href="{{ url_for('events.all_events') }}">События</a></li>{% endif %}
+                    <li><a href="#">Управление</a>
+                        <div uk-dropdown>
+                            <ul class="uk-nav uk-dropdown-nav">
+                                {% if g.s %}<li><a style="color: #333 !important" href="{{ url_for('exams.all') }}">Протоколы</a></li>{% endif %}
+                                <li><a style="color: #333 !important" href="{{ url_for('list_assemblies') }}">Методические заседания</a></li>
+                                {% if g.s %}<li><a style="color: #333 !important" href="{{ url_for('settings.attest_list') }}">Виды аттестации</a></li>{% endif %}
+                            </ul>
+                        </div>
+                    </li>
+                    <li><a href="{{ url_for('settings.all') }}"><span uk-icon="cog"></span></a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main class="uk-section uk-section-muted">
+        <div class="uk-container">
+        {% block content %}
+            Кажется, кто-то забыл про блок <code>content</code> в шаблоне 🤔
+        {% endblock %}
+        </div>
+    </main>
+    <!-- Подвал -->
+    <footer class="uk-section uk-section-secondary uk-section-xlarge">
+        <div class="uk-container">
+            <p>Методический кабинет музыкальной школы</p>
+            <p><a href="https://github.com/Brukvo/Palantir">Palantir / Палантир</a> © 2025 создан <a href="https://github.com/Brukvo">Антоном Дмитриевым</a> и опубликован под лицензией <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International <img src="{{ url_for('static', filename='images/cc.svg') }}" style="max-height: 1em; max-width: 1em"><img src="{{ url_for('static', filename='images/by.svg') }}" style="max-height: 1em; max-width: 1em"><img src="{{ url_for('static', filename='images/nc.svg') }}" style="max-height: 1em; max-width: 1em"><img src="{{ url_for('static', filename='images/sa.svg') }}" style="max-height: 1em; max-width: 1em"></a></p>
+        </div>
+    </footer>
+    {% block footer_scripts %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <script>
+        {% for category, message in messages %}
+        UIkit.notification({
+            message: '{{message|safe}}',
+            status: '{{category}}',
+            pos: 'top-right',
+            timeout: 5000
+        });
+        {% endfor %}
+    </script>
+    {% endif %}
+    {% endwith %}
+    {% endblock %}
+</body>
+
+</html>

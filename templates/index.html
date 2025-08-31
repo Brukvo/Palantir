@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+<!-- Основное содержимое -->
+{% block content %}
+<h1 class="uk-text-center uk-heading-line"><span>Добро пожаловать!</span></h1>
+<br>
+{% if not deps %}
+<div class="uk-alert uk-alert-warning">
+<p>В базе не найдены отделения. Перед началом работы необходимо <a href="{{ url_for('settings.departments_add') }}">добавить хотя бы одно отделение</a> в базу данных. <span class="uk-text-bold uk-text-danger">Без этого система не будет работать!</span></p>
+</div>
+{% endif %}
+{% if not teachers %}
+<div class="uk-alert uk-alert-warning">
+<p>В базе не найдены преподаватели. Перед началом работы необходимо <a href="{{ url_for('teachers.add')}}">добавить преподавателей</a> в базу данных.</p>
+</div>
+{% endif %}
+{% if not students %}
+<div class="uk-alert uk-alert-warning">
+<p>В базе не найдены ученики. Перед началом работы необходимо <a href="{{ url_for('students.add') }}">добавить учеников</a> в базу данных.</p>
+</div>
+{% endif %}
+<div class="uk-child-width-1-3 uk-grid-collapse uk-text-center" uk-grid>
+    <div>
+        <div class="uk-tile uk-tile-primary">
+            <p class="uk-h3">Учеников</p>
+            <p class="uk-h1"><span uk-tooltip="Списочное количество">{{ students }}</span> / <span uk-tooltip="Физическое количество">{{ bodies }}</span></p>
+        </div>
+    </div>
+    <div>
+        <div class="uk-tile uk-tile-secondary">
+            <p class="uk-h3">Преподавателей</p>
+            <p class="uk-h1">{{ teachers }}</p>
+        </div>
+    </div>
+    <div>
+        <div class="uk-tile uk-tile-default">
+            <p class="uk-h3">Отделений</p>
+            <p class="uk-h1">{{ deps }}</p>
+        </div>
+    </div>
+</div>
+
+<p><span class="uk-h2">Концерты</span> в этой четверти</p>
+{% if concerts %}
+<table class="uk-table uk-table-small">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Уч. год</th>
+            <th>Четверть</th>
+            <th>Дата</th>
+            <th>Название</th>
+            <th>Место</th>
+            <th>Ответственный</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for concert in concerts %}
+        <tr>
+            <td><span class="uk-text-{% if concert.has_passed %}success{% else %}primary{% endif %}">●</span></td>
+            <td>{{ concert.academic_year }}</td>
+            <td>{{ concert.term }}</td>
+            <td>{{ concert.date.strftime('%d.%m.%Y') }}</td>
+            <td><a href="{{ url_for('events.concert_view', id=concert.id) }}">{{ concert.title }}</a></td>
+            <td>{{ concert.place }}</td>
+            <td><a href="{{ url_for('teachers.view', id=concert.teacher_id) }}">{{ concert.teacher.short_name }}</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Нет зафиксированных концертов</p>
+{% endif %}
+
+<p><span class="uk-h2">Конкурсы</span> в этой четверти</p>
+{% if contests %}
+<table class="uk-table uk-table-small">
+    <thead>
+        <tr>
+            <th>Уч. год</th>
+            <th>Четверть</th>
+            <th>Дата</th>
+            <th>Название</th>
+            <th>Место</th>
+            <th>Ответственный</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for contest in contests %}
+        <tr>
+            <td>{{ contest.academic_year }}</td>
+            <td>{{ contest.term }}</td>
+            <td>{{ contest.date.strftime('%d.%m.%Y') }}</td>
+            <td>{{ contest.title }}</td>
+            <td>{{ contest.place }}</td>
+            <td><a href="{{ url_for('teachers.view', id=contest.teacher_id) }}">{{ contest.teacher.short_name }}</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Нет зафиксированных конкурсов</p>
+{% endif %}
+{% endblock %}
+
+
+<!-- Скрипты -->

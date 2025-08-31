@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{ title }}
+    <a href="{{ url_for('students.ensembles_add') }}" class="uk-icon-button uk-button-default" uk-icon="plus" uk-tooltip="title: Добавить коллектив или дуэт; pos: bottom"></a>
+    <a href="{{ url_for('students.ensembles_add_member') }}" class="uk-icon-button uk-button-default" uk-icon="plus-circle" uk-tooltip="title: Добавить участника в коллектив или дуэт; pos: bottom"></a>
+</h2>
+{% if ensembles %}
+<table class="uk-table uk-table-small">
+    <tr>
+        <th>Название коллектива</th>
+        <th>Руководитель</th>
+        <th>Состав</th>
+        <th>&nbsp;</th>
+    </tr>
+    {% for e in ensembles %}
+    <tr>
+        <td>{{ e.name }}</td>
+        <td><a href="{{ url_for('teachers.view', id=e.teacher_id) }}">{{ e.teacher.short_name }}</a></td>
+        <td><ul>
+            {% for member in e.members %}
+            <li><a href="{{ url_for('students.view', id=member.id) }}">{{ member.short_name }}</a>, {{member.class_level}}/{{member.study_years}}</li>
+            {% endfor %}
+            </ul>
+        </td>
+        <td>
+            <a href="{{ url_for('students.ensembles_add_member', ensemble_id=e.id) }}" class="uk-icon-button" uk-icon="user" uk-tooltip="title: Добавить участника коллектива; pos: bottom"></a>
+            <a href="{{ url_for('students.ensembles_delete', id=e.id) }}" class="uk-icon-button uk-text-danger" uk-tooltip="title: Удалить коллектив; pos: bottom"><span uk-icon="trash"></span></a>
+        </td>
+    </tr>
+    {% endfor %}
+    </table>
+{% else %}
+<p>Ещё нет коллективов. Добавьте коллектив, а затем добавьте участников в этот коллектив</p>
+{% endif %}
+
+{% endblock %}

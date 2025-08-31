@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+        <h2>{{title}} <span class="uk-text-muted">Шаг 3</span></h2>
+        <form action="{{ url_for('exams.create_step3') }}" method="post" class="uk-form-horizontal">
+            {{ form.csrf_token }}
+            {% for student in students %}
+
+            
+            <!-- Поле программы -->
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form['program_' + student.id|string].label }}</label>
+                <div class="uk-form-controls">
+                    {{ form['program_' + student.id|string](class="uk-textarea", rows=4, placeholder="Список произведений или элементов программы") }}
+                    <span class="uk-text-small uk-text-muted">Выберите необходимых студентов из списка</span>
+                </div>
+            </div>
+
+            <div class="uk-grid" uk-grid>
+                <div class="uk-width-1-2">
+                    <!-- Поле оценки -->
+                    <div class="uk-margin">
+                        <label class="uk-form-label">Оценка</label>
+                        <div class="uk-form-controls">
+                            {{ form['grade_' + student.id|string](class="uk-input", placeholder="5, 4+ и т.д.") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-width-1-2">
+                    <!-- Поле преподавателя -->
+                     <div class="uk-margin">
+                         <label class="uk-form-label">Класс преподавателя</label>
+                         <div class="uk-form-controls">
+                             {{ form['teacher_' + student.id|string](class="uk-select") }}
+                         </div>
+                     </div>
+                </div>
+            </div>
+
+            <hr>
+
+
+            {% endfor %}
+
+            <div class="uk-margin">
+                {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+            </div>
+        </form>
+{% endblock %}

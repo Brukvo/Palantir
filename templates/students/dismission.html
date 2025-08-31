@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+<p class="uk-article-meta">{{ student.short_name }}, {{ student.class_level }}/{{ student.study_years }} ({{
+    student.department.title }})</p>
+
+<form action="{{ url_for('students.dismiss', id=student.id, s_id=request.args.get('s_id', 2), reason=request.args.get('reason')) }}" method="post">
+    {{ form.csrf_token }}
+
+    <div class="uk-child-width-1-2" uk-grid>
+        <div>
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.dismission_date.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.dismission_date(class='uk-input uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted"></span>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.cert_no.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.cert_no(class='uk-input uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted">Серия и № свидетельства</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">{{ form.dismission_reason.label }}</label>
+            <div class="uk-form-controls">
+                {{ form.dismission_reason(class='uk-input uk-border-rounded', value=request.args.get('reason')) }}
+                <span class="uk-text-small uk-text-muted"></span>
+            </div>
+        </div>
+    </div>
+
+<div class="uk-margin">
+    {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+</div>
+
+
+</form>
+{% endblock %}

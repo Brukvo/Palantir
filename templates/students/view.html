@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} / {{ super() }}{% endblock %}
+
+{% block content %}
+<h2>
+    <a href="{{ url_for('students.all') }}" uk-icon="chevron-left" class="uk-icon-button"
+        uk-tooltip="title: Назад к списку учеников; pos: bottom"></a>
+    {{ title }}
+    <a href="{{ url_for('students.get_title_page', id=student.id) }}"
+        class="uk-icon-button uk-border-circle" uk-icon="file-text"
+        uk-tooltip="Сформировать титульную страницу для личного дела"></a>
+    <a href="{{ url_for('students.edit', id=student.id) }}" class="uk-icon-button uk-border-circle"
+        uk-icon="pencil" uk-tooltip="Редактировать"></a>
+    <a href="{{ url_for('students.dismiss', id=student.id, s_id=3) }}" class="uk-icon-button uk-border-circle uk-text-danger" uk-tooltip="Перевести в академический отпуск"><span uk-icon="sign-out"></span></a>
+</h2>
+<p class="uk-article-meta">Статус: <b>{{ student.status.status }}</b></p>
+<h4>{{ student.department.short_name }}, {{ student.class_level }}/{{ student.study_years}}
+    {% if student.is_deep_level %}<span class="uk-label uk-label-primary">углубленный уровень</span>{% endif %}
+</h4>
+</h1>
+
+<ul uk-accordion="multiple: true">
+    <li class="uk-open">
+        <a class="uk-accordion-title uk-text-primary" href>Личное дело</a>
+        <div class="uk-accordion-content">
+
+            <table class="uk-table uk-table-small">
+                <tbody>
+                    <tr>
+                        <th>День рождения</th>
+                        <td>{{ student.birth_date.strftime('%d %B %Y') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Год приёма</th>
+                        <td>{{ student.admission_year }}</td>
+                    </tr>
+                    <tr>
+                        <th>Адрес проживания</th>
+                        <td>{{ student.address }}</td>
+                    </tr>
+                    <tr>
+                        <th>Класс преподавателя</th>
+                        <td><a href="{{ url_for('teachers.view', id=student.lead_teacher_id) }}">{{
+                                student.lead_teacher.full_name }}</a></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="uk-text-center"><br><span class="uk-text-bold">Сведения о родителях
+                                (законных
+                                представителях)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="uk-text-bold">Мать (законный представитель)</td>
+                    </tr>
+                    <tr>
+                        <th>ФИО матери</th>
+                        <td>{{ student.mother_full_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Место работы матери, должность</th>
+                        <td>{{student.mother_workplace}}{% if student.mother_occupation != '(не указано)' %}, {{student.mother_occupation}}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>Контактный телефон</th>
+                        <td>{{ student.mother_contact_phone }}</td>
+                    </tr>
+                    {% if student.father_full_name %}
+                    <tr>
+                        <td colspan="2" class="uk-text-bold">Отец (законный представитель)</td>
+                    </tr>
+                    <tr>
+                        <th>ФИО отца</th>
+                        <td>{{ student.father_full_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Место работы отца, должность</th>
+                        <td>{{student.father_workplace}}{% if student.father_occupation != '(не указано)' %}, {{student.father_occupation}}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>Контактный телефон</th>
+                        <td>{{ student.father_contact_phone }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </li>
+    <li>
+        <a class="uk-accordion-title uk-text-primary" href>Сданные зачёты и экзамены</a>
+        <div class="uk-accordion-content">
+            {% if student.exam_items %}
+            <table class="uk-table">
+                <tr>
+                    <th>Учебный год</th>
+                    <th>Вид зачёта</th>
+                    <th>Дата</th>
+                    <th>Программа</th>
+                    <th>Оценка</th>
+                </tr>
+                {% for e in student.exam_items %}
+                <tr>
+                    <td>{{ e.exam.academic_year }}</td>
+                    <td><a href="{{ url_for('exams.exam_detail', id=e.exam.id)}}">{{ e.exam.exam_type.name}}</a>
+                    </td>
+                    <td>{{ e.exam.date.strftime('%d.%m.%Y') }}</td>
+                    <td>
+                        {% for piece in e.program.split('\r\n') %}
+                        {{piece}}<br>
+                        {% endfor %}
+                    </td>
+                    <td>{{e.grade}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>Ученик ещё не сдавал зачётов и экзаменов за время обучения</p>
+            {% endif %}
+        </div>
+    </li>
+    <li>
+        <a class="uk-accordion-title uk-text-primary" href>Участие в концертах</a>
+        <div class="uk-accordion-content">
+            <p class="uk-text-bold">Соло</p>
+            {% if student.concert_participations %}
+            <table class="uk-table uk-table-small">
+                <caption>
+                </caption>
+                <tr>
+                    <th>Уч.год</th>
+                    <th>Дата</th>
+                    <th>Название</th>
+                </tr>
+                {% for c in student.concert_participations %}
+                <tr>
+                    <td>{{ c.concert.academic_year }}</td>
+                    <td>{{ c.concert.date.strftime('%d.%m.%Y') }}</td>
+                    <td><a href="{{ url_for('events.concert_view', id=c.id) }}">{{ c.concert.title }}</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>&emsp;Ученик ещё не принимал сольного участия в концертах</p>
+            {% endif %}
+
+            <p class="uk-text-bold">В составе коллективов</p>
+            {% if ensemble_participations %}
+            <table class="uk-table uk-table-small">
+                <caption>
+                </caption>
+                <tr>
+                    <th>Уч.год</th>
+                    <th>Дата</th>
+                    <th>Название</th>
+                </tr>
+                {% for p in ensemble_participations %}
+                <tr>
+                    <td>{{ p.concert.academic_year }}</td>
+                    <td>{{ p.concert.date.strftime('%d.%m.%Y') }}</td>
+                    <td><a href="{{ url_for('events.concert_view', id=p.concert.id) }}">{{ p.concert.title }}</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>&emsp;Ученик ещё не принимал участия в концертах в составе коллективов</p>
+            {% endif %}
+
+        </div>
+    </li>
+    <li>
+        <a class="uk-accordion-title uk-text-primary" href>Участие в конкурсах</a>
+        <div class="uk-accordion-content">
+            <p class="uk-text-bold">Соло</p>
+            {% if student.contest_participations %}
+            <table class="uk-table uk-table-small">
+                <tr>
+                    <th>Уч. год</th>
+                    <th>Дата</th>
+                    <th>Название</th>
+                    <th>Место</th>
+                    <th>Результат</th>
+                </tr>
+                {% for participation in student.contest_participations %}
+                <tr>
+                    <td>{{ participation.contest.academic_year }}</td>
+                    <td>{{ participation.contest.date.strftime('%d.%m.%Y') }}</td>
+                    <td><a href="{{ url_for('events.contest_view', id=participation.contest.id) }}">{{ participation.contest.title }}</a></td>
+                    <td>{{ participation.contest.place }}</td>
+                    <td>{{ participation.result }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>&emsp;Ученик ещё не принимал сольного участия в конкурсах</p>
+            {% endif %}
+
+            <p class="uk-text-bold">В составе коллективов</p>
+            {% if contest_ens %}
+            <table class="uk-table uk-table-small">
+                <tr>
+                    <th>Уч. год</th>
+                    <th>Дата</th>
+                    <th>Название</th>
+                    <th>Место</th>
+                    <th>Результат</th>
+                </tr>
+            {% for p in contest_ens %}
+                <tr>
+                    <td>{{p.contest.academic_year}}</td>
+                    <td>{{ p.contest.date.strftime('%d.%m.%Y') }}</td>
+                    <td><a href="{{ url_for('events.contest_view', id=p.contest.id) }}">{{ p.contest.title }}</a></td>
+                    <td>{{ p.contest.place }}</td>
+                    <td>{{ p.result }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+            {% else %}
+            <p>&emsp;Ученик ещё не принимал участия в конкурсах в составе коллективов</p>
+            {% endif %}
+        </div>
+    </li>
+    <li>
+        <a class="uk-accordion-title uk-text-primary" href>Участие в коллективах</a>
+        <div class="uk-accordion-content">
+            {% if student.ensembles %}
+            <ul>
+                {% for e in student.ensembles %}
+                <li>{{ e.name }} (рук. {{e.teacher.short_name}})</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            Ученик не состоит в коллективах
+            {% endif %}
+        </div>
+    </li>
+</ul>
+{% endblock %}

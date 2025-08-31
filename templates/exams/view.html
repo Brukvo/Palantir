@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+        <h2>Протокол №{{ exam.protocol_number }} от {{exam.date.strftime('%d.%m.%Y')}} <span
+                class="uk-label uk-label-primary">{{ exam.exam_type.name|title }}</span> <a
+                href="{{ url_for('exams.protocol', id=exam.id) }}" class="uk-icon-button uk-button-default"
+                uk-icon="download" uk-tooltip="title: Сохранить протокол; pos: bottom"></a></h2>
+        <div class="uk-grid" uk-grid>
+            <div class="uk-width-1-3">
+                <p class="uk-lead uk-text-center">{{exam.department.title|capitalize}}</p>
+            </div>
+            <div class="uk-width-1-3">
+                <p class="uk-lead uk-text-center">{{exam.discipline}}</p>
+            </div>
+            <div class="uk-width-1-3">
+                <p class="uk-lead uk-text-center">{{exam.academic_year}} учебный год</p>
+            </div>
+        </div>
+        <div class="uk-alert uk-alert-primary uk-border-rounded">
+            <p class="uk-text-center uk-text-primary uk-text-bold">Сводка</p>
+
+            <div class="uk-grid">
+                <div class="uk-width-1-2">
+                    <p>Присутствовали: <br>
+                    <ul>{% for member in exam.commission_members.split(', ') %}
+                        <li>{{ member }}</li>
+                        {% endfor %}
+                    </ul>
+                    </p>
+    
+                </div>
+                <div class="uk-width-1-2">
+    
+                    <p>Всего сдавало {{ props['total'] }} обучающихся, из них:
+                    <ul>
+                        {% if props['grades']['5'] %}
+                        <li>отлично: {{ props['grades']['5'] }}</li>
+                        {% endif %}
+                        {% if props['grades']['4'] %}
+                        <li>хорошо: {{props['grades']['4']}}</li>
+                        {% endif %}
+                        {% if props['grades']['3'] %}
+                        <li>удовлетворительно: {{props['grades']['3']}}</li>
+                        {% endif %}
+                        {% if props['grades']['2'] %}
+                        <li>неудовлетворительно: {{props['grades']['2']}}</li>
+                        {% endif %}
+                        {% if props['grades']['1'] %}
+                        <li>не сдавало: {{props['grades']['1']}}</li>
+                        {% endif %}
+                    </ul>
+                    Количественная успеваемость: {{ props['quality'] }}% <br>
+                    Качественная успеваемость: {{ props['quantity'] }}%
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% for ei in exam_items %}
+        <dl>
+            <dt><a href="{{ url_for('students.view', id=ei.student.id) }}">{{ ei.student.short_name }}</a>, <span class="uk-text-normal">{{
+                    ei.student.class_level }}/{{
+                    ei.student.study_years }}{% if ei.student.is_deep_level %}, углубленный уровень{% endif %} (кл.преп.: <a href="{{ url_for('teachers.view', id=ei.student.lead_teacher_id) }}">{{ ei.student.lead_teacher.short_name }}</a>)</span></dt>
+            <dd>
+                <ol>
+                    {% for piece in ei.program.split('\r\n') %}
+                    <li>{{ piece }}</li>
+                    {% endfor %}Оценка: {% if '1' not in ei.grade %}<span class="uk-text-bold">{{
+                        ei.grade }}</span>{% else %}не сдавал(а) по уважительной причине{% endif %}
+                </ol>
+            </dd>
+        </dl>
+        {% endfor %}
+
+{% endblock %}

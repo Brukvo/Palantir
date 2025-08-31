@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title}}</h2>
+<form action="{{ url_for('settings.attest_add') }}" method="post">
+    {{form.csrf_token}}
+
+    <div class="uk-margin">
+        <label class="uk-form-label">{{ form.name.label }}</label>
+        <div class="uk-form-controls">
+            {{ form.name(class='uk-input uk-border-rounded') }}
+            <span class="uk-text-small uk-text-muted">Это название будет использоваться везде, в том числе при формировании документов</span>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+    </div>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+    <h2>{{title}}
+    <a href="{{ url_for('settings.departments_edit', id=department.id) }}" class="uk-icon-button" uk-icon="pencil" uk-tooltip="title: Редактировать отделение; pos: bottom"></a>
+    <a href="{{ url_for('settings.department_report', id=department.id) }}" class="uk-icon-button" uk-icon="file-text" uk-tooltip="title: Сдать отчёт по успеваемости; pos: bottom"></a>
+    </h2>
+    {% if department.reports %}
+    <h4>Отчёты об успеваемости</h4>
+    <table class="uk-table uk-table-small uk-table-hover uk-table-stripe">
+        <tr>
+            <th>Уч. год</th>
+            <th>Период</th>
+            <th>Учеников</th>
+            <th>5</th>
+            <th>4</th>
+            <th>3</th>
+            <th>2</th>
+            <th>Кол.%</th>
+            <th>Кач.%</th>
+            <th></th>
+        </tr>
+        {% for report in department.reports %}
+        <tr>
+            <td>{{report.academic_year}}</td>
+            <td>{{report.term}}</td>
+            <td>{{report.total}}</td>
+            <td>{{report.got_best}}</td>
+            <td>{{report.got_good}}</td>
+            <td>{{report.got_avg}}</td>
+            <td>{{report.got_bad}}</td>
+            <td>{{report.quantity}}</td>
+            <td>{{report.quality}}</td>
+            <td><a href="{{ url_for('settings.get_dep_report', dep_id=department.id, term=report.term) }}" class="uk-icon-button" uk-icon="file-text"></a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    <h4>Преподаватели отделения</h4>
+    <ul>
+    {% for teacher in department.teachers %}
+        <li><a href="{{ url_for('teachers.view', id=teacher.id)}}">{{ teacher.full_name }}</a></li>
+    {% endfor %}
+    </ul>
+    <h4>Список учеников отделения
+        <a href="{{ url_for('settings.get_students', id=department.id) }}" class="uk-icon-button" uk-icon="download" uk-tooltip="title: Скачать список учеников отделения; pos: bottom"></a>
+    </h4>
+        <table class="uk-table uk-table-small uk-table-hover">
+            <tr>
+                <th>Ученик</th>
+                <th>Преподаватель</th>
+                <th>Класс</th>
+                <th uk-tooltip="title: Соло / Коллектив / Всего; pos: top">Концертов</th>
+                <th uk-tooltip="title: Соло / Коллектив / Всего; pos: top">Конкурсов</th>
+                <th class="uk-table-shrink" uk-tooltip="title: Общая сумма выступлений; pos: top">&sum;</th>
+            </tr>
+            {% for student in students %}
+            {% set total_concerts = student.concert_participations|count + student.ensemble_participations|count %}
+            {% set total_contests = student.contest_participations|count + student.contest_ens_participations|count %}
+            {% set total_performances = total_concerts + total_contests %}
+            <tr>
+                <td><a href="{{ url_for('students.view', id=student.id) }}">{{ student.short_name }}</a></td>
+                <td><a href="{{ url_for('teachers.view', id=student.lead_teacher_id) }}">{{ student.lead_teacher.short_name }}</a></td>
+                <td>{{ student.class_level }}/{{ student.study_years }}</td>
+                <td>{{ student.concert_participations|count }} / {{ student.ensemble_participations|count }} / <b>{{ total_concerts }}</b></td>
+                <td>{{ student.contest_participations|count }} / {{ student.contest_ens_participations|count }} / <b>{{ total_contests }}</b></td>
+                <td><span class="uk-text-bold {% if total_performances >= 3 %}uk-text-success{% elif total_performances == 2 %}uk-text-warning{% endif %}">{{ total_performances }}</span></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

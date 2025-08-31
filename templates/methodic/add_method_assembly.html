@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title}}</h2>
+<form action="{{ url_for('send_assembly') }}" method="post">
+    {{ form.csrf_token }}
+
+    <div class="uk-child-width-1-2" uk-grid>
+        <div>
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.date.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.date(class='uk-input uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted"></span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.teacher_id.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.teacher_id(class='uk-select uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label">{{ form.title.label }}</label>
+        <div class="uk-form-controls">
+            {{ form.title(class='uk-input uk-border-rounded') }}
+            <span class="uk-text-small uk-text-muted"></span>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label">{{ form.description.label }}</label>
+        <div class="uk-form-controls">
+            {{ form.description(class='uk-textarea uk-border-rounded', rows=5) }}
+            <span class="uk-text-small uk-text-muted"></span>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+    </div>
+    
+
+</form>
+{% endblock %}

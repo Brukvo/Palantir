@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{contest.title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{contest.title}}
+    <a href="{{ url_for('events.contest_part_add', contest_id=contest.id) }}" class="uk-icon-button" uk-icon="user" uk-tooltip="title: Добавить участника; pos: bottom"></a>
+</h2>
+<div uk-grid>
+    <div class="uk-width-1-2">
+        <p class="uk-text-center">{{ contest.academic_year }} учебный год, {{ contest.term }} четверть</p>
+    </div>
+    <div class="uk-width-1-2">
+        <p class="uk-text-center">{{ contest.date.strftime('%d.%m.%Y') }}</p>
+    </div>
+</div>
+<div uk-grid>
+    <div class="uk-width-1-2">
+        <p class="uk-text-center">Место проведения: {{ contest.place }}</p>
+    </div>
+    <div class="uk-width-1-2">
+        <p class="uk-text-center">Ответственный: <a href="{{ url_for('teachers.view', id=contest.teacher_id) }}" uk-tooltip="title: {{contest.teacher.full_name}}; pos: bottom">{{ contest.teacher.short_name }}</a></p>
+    </div>
+</div>
+<h3>Участники конкурса</h3>
+{% if contest.participations %}
+<table class="uk-table uk-table-small">
+    <tr>
+        <th>Участник</th>
+        <th>Класс преподавателя</th>
+        <th>Результат</th>
+    </tr>
+    {% for p in contest.participations %}
+    <tr>
+        {% if p.student_id %}
+        <td><a href="{{ url_for('students.view', id=p.student_id)}}">{{ p.student.short_name }}</a></td>
+        <td>{{ p.student.lead_teacher.short_name }}</td>
+        {% else %}
+        <td>{{ p.ensemble.name }}:<ul>{% for m in p.ensemble.members %}<li>{{ m.short_name }}</li>{% endfor %}</ul></td>
+        <td>{{ p.ensemble.teacher.short_name }}</td>
+        {% endif %}
+        <td>{{ p.result }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</ul>
+{% else %}
+<p>В концерте пока никто не принимал участия.</p>
+{% endif %}
+{% endblock %}

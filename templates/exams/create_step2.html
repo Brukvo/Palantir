@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+        <h2>{{title}} <span class="uk-text-muted">Шаг 2</span></h2>
+        <form action="{{url_for('exams.create_step2')}}" method="post" class="uk-form-horizontal">
+            {{ form.csrf_token }}
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.student_ids.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.student_ids(class='uk-select uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted">Выберите необходимых студентов из списка</span>
+                </div>
+            </div>
+
+            <div class="uk-margin">
+                {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+            </div>
+
+        </form>
+{% endblock %}

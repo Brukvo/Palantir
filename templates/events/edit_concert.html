@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<form action="{{ url_for('events.concert_edit', id=concert.id)}}" method="post">
+<div uk-grid>
+    <div class="uk-width-3-4">
+        <h2>
+        {{ title }}
+        </h2>
+    </div>
+    <div class="uk-width-1-4">
+        <div class="uk-alert uk-alert-primary">
+            <label class="uk-form-label">
+                {{ form.has_passed(class="uk-checkbox uk-border-rounded") }}
+                {{ form.has_passed.label }}
+            </label>
+        </div>
+    </div>
+</div>
+    {{ form.csrf_token }}
+    <div uk-grid>
+
+        <div class="uk-width-1-2">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.date.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.date(class='uk-input uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-width-1-2">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.teacher_id.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.teacher_id(class='uk-select uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label">{{ form.title.label }}</label>
+        <div class="uk-form-controls">
+            {{ form.title(class='uk-input uk-border-rounded') }}
+            <span class="uk-text-small uk-text-muted"></span>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+    {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+    </div>
+
+</form>
+{% endblock %}
