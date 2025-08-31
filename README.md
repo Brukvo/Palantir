@@ -98,7 +98,11 @@ sudo apt upgrade
 ```shell
 sudo apt install python3-pipenv
 ```
-Клонируйте репозиторий в удобную папку, перейдите в неё и активируйте (или создайте) окружение:
+Клонируйте репозиторий в удобную папку:
+```shell
+git clone https://github.com/Brukvo/Palantir.git ./Palantir
+```
+Перейдите в эту папку и создайте окружение:
 ```shell
 pipenv shell
 ```
