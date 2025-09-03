@@ -9,8 +9,9 @@ flask-wtf = "*"
 flask-sqlalchemy = "*"
 python-docx = "*"
 flask-migrate = "*"
+tomli = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "*"
