@@ -9,7 +9,14 @@ bp = Blueprint('teachers', __name__, url_prefix='/teachers')
 @bp.route('/')
 def all():
     teachers = Teacher.query.all()
-    return render_template('teachers/list.html', teachers=teachers, title='Список преподавателей')
+    t_c_reports = {t.id: [False, False, False, False, False] for t in teachers}
+    all_c_reports = ClassReportItem.query.filter_by(academic_year=get_academic_year())
+    for t in teachers:
+        for term in range(1, 6):
+            for report in all_c_reports:
+                if report.term == term and report.teacher_id == t.id:
+                    t_c_reports[t.id][term-1] = True
+    return render_template('teachers/list.html', teachers=teachers, t_reports=t_c_reports, title='Список преподавателей')
 
 @bp.route('/add', methods=['POST', 'GET'])
 def add():

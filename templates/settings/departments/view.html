@@ -42,15 +42,20 @@
 </table>
 {% endif %}
 <h4>Преподаватели отделения</h4>
-<table class="uk-table uk-table-small uk-table-stripe uk-table-hover">
+<table class="uk-table uk-table-small uk-table-striped">
+    <tr>
+        <th></th>
+        <th></th>
+        <th class="uk-text-center uk-text-nowrap" colspan="5">Отчёт по классному руководству</th>
+    </tr>
     <tr>
         <th>Преподаватель</th>
         <th class="uk-text-center">Уч</th>
-        <th class="uk-text-center">I</th>
-        <th class="uk-text-center">II</th>
-        <th class="uk-text-center">III</th>
-        <th class="uk-text-center">IV</th>
-        <th class="uk-text-center">Г</th>
+        <th class="uk-text-center uk-table-shrink">I</th>
+        <th class="uk-text-center uk-table-shrink">II</th>
+        <th class="uk-text-center uk-table-shrink">III</th>
+        <th class="uk-text-center uk-table-shrink">IV</th>
+        <th class="uk-text-center uk-table-shrink">год</th>
     </tr>
     {% for teacher in department.teachers %}
     <tr>

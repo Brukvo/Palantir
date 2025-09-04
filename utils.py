@@ -27,7 +27,7 @@ def get_term(dt=None):
         return 2
     elif month in [1, 2, 3]:
         return 3
-    elif month in [4, 5, 6]:
+    elif month in [4, 5]:
         return 4
     return None
 

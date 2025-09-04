@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
-from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem
+from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem, ClassReportItem
 from datetime import datetime
 from forms import EnsembleForm, EnsembleMemberForm, DepartmentForm, ExamTypeForm, DepartmentReportForm
 from sqlalchemy import func, select, desc, distinct
@@ -225,6 +225,22 @@ def get_dep_report(dep_id, term):
         download_name=filename,
         mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     )
+
+@bp.route('/departments/get_all_deps_report/term_<int:term>')
+def get_all_deps_report(term):
+    # получить отделения
+    deps = Department.query.all()
+    # собрать отчёты по классному руководству
+    teachers = Teacher.query.all()
+    teacher_class_reports = ClassReportItem.query.filter_by(term=term, academic_year=get_academic_year()).all()
+    # собрать отчёты по отделениям
+    dep_reports = DepartmentReportItem.query.filter_by(term=term, academic_year=get_academic_year()).all()
+    # вывести в документ
+    print('Отчёты по классному руководству учителей: ', teacher_class_reports)
+    print('Отчёты по отделениям: ', dep_reports)
+    flash('Отчёт выведен в лог', 'success')
+    return redirect(url_for('settings.departments_all'))
+
 
 @bp.route('/attest')
 def attest_list():

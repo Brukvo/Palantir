@@ -10,9 +10,23 @@
         {% else %}
         <table class="uk-table uk-table-small uk-table-striped uk-table-hover">
             <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th colspan="5" class="uk-text-center">Классное руководство</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
                 <th>Преподаватель</th>
                 <th>Отделение</th>
                 <th>Уч</th>
+                <th class="uk-text-center">I</th>
+                <th class="uk-text-center">II</th>
+                <th class="uk-text-center">III</th>
+                <th class="uk-text-center">IV</th>
+                <th class="uk-text-center">год</th>
                 <th><span uk-tooltip="Методический доклад">Д</span></th>
                 <th><span uk-tooltip="Открытый урок">У</span></th>
                 <th>Действия</th>
@@ -22,8 +36,11 @@
                 <td><a href="{{ url_for('teachers.view', id=teacher.id) }}">{{ teacher.full_name }}</a></td>
                 <td><a href="{{ url_for('settings.departments_view', id=teacher.main_department_id) }}">{{ teacher.main_department.title }}</a></td>
                 <td>{% if teacher.main_department_id %}{{ teacher.students|count }}{% endif %}</td>
-                <td><span class="{% if teacher.lecture_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span></td>
-                <td><span class="{% if teacher.open_lesson_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span></td>
+                {% for report in t_reports[teacher.id] %}
+                <td class="uk-text-center">{% if teacher.main_department_id %}<span class="uk-text-{% if report %}success{% else %}warning{% endif %}">●</span>{% endif %}</td>
+                {% endfor %}
+                <td>{% if teacher.main_department_id %}<span class="{% if teacher.lecture_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span>{% endif %}</td>
+                <td>{% if teacher.main_department_id %}<span class="{% if teacher.open_lesson_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span>{% endif %}</td>
                 <td>
                     <a href="{{ url_for('teachers.edit', id=teacher.id) }}" class="uk-icon-button uk-button-default" uk-icon="pencil" uk-tooltip="title: Редактировать; pos: left"></a>
                     <a href="{{ url_for('teachers.delete', id=teacher.id) }}" class="uk-icon-button uk-button-default uk-text-danger" uk-icon="trash" uk-tooltip="title: Удалить; pos: left"></a>

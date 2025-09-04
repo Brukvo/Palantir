@@ -6,7 +6,14 @@
     <h2>{{title}}
         <a href="{{ url_for('settings.departments_add') }}" class="uk-icon-button" uk-icon="plus" uk-tooltip="'title: Добавить отделение; pos: bottom"></a>
     </h2>
-        <table class="uk-table uk-table-small uk-table-hover">
+        <table class="uk-table uk-table-small uk-table-striped">
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th colspan="5" class="uk-text-center">Отчёт по отделению</th>
+                <th></th>
+            </tr>
             <tr>
                 <th>Отделение</th>
                 <th>Программа</th>
@@ -39,7 +46,7 @@
                 <td></td>
                 <td></td>
                 {% for t in range(1, 6) %}
-                <td class="uk-text-center">{% if not is_reportable[t] %}<a href="{{ url_for('settings.get_dep_report', term=t, dep_id=1) }}" class="uk-icon-button " uk-icon="file-text" uk-tooltip="Выгрузить отчёт за четверть по всем отделениям"></a>{% else %}&mdash;{% endif %}</td>
+                <td class="uk-text-center">{% if is_reportable[t] %}<a href="{{ url_for('settings.get_all_deps_report', term=t) }}" class="uk-icon-button " uk-icon="file-text" uk-tooltip="Выгрузить отчёт за четверть по всем отделениям"></a>{% else %}&mdash;{% endif %}</td>
                 {% endfor %}
                 <td></td>
             </tr>
