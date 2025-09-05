@@ -217,27 +217,12 @@ def exam_detail(id):
 def protocol(id):
     exam = Exam.query.get_or_404(id)
     exam_items = ExamItem.query.filter_by(event_id=exam.id)
-    total_students = exam_items.count()
-    grades = [exam_item.grade for exam_item in exam_items]
-    grade_counts = {
-        '5': 0,
-        '4': 0,
-        '3': 0,
-        '2': 0,
-        '1': 0
-    }
 
-    for grade in grades:
-        for g in ['1', '2', '3', '4', '5']:
-            if g in grade:
-                grade_counts[g] += 1
-    qual = round((grade_counts['4'] + grade_counts['5']) / total_students * 100)
-    quan = round((grade_counts['4'] + grade_counts['5'] + grade_counts['3']) / total_students * 100)
     props = {
-        'total': total_students,
-        'quality': qual,
-        'quantity': quan,
-        'grades': grade_counts
+        'total': len(exam_items),
+        'quality': exam.quality,
+        'quantity': exam.quantity,
+        'grades': {'5': exam.got_best, '4': exam.got_good, '3': exam.got_avg, '2': exam.got_bad, '1': exam.got_nothing}
     }
 
     file_stream = generate_protocol(exam, exam_items, props)
