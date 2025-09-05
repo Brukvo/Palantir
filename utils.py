@@ -4,9 +4,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_ORIENT
 from io import BytesIO
 from datetime import datetime
-from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem
+from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem
 from extensions import db
-from sqlalchemy import desc
+from sqlalchemy import desc, select
 
 from datetime import date
 
@@ -424,3 +424,14 @@ def generate_dep_report(dep_id, term, with_title=True):
     file_stream.seek(0)
     
     return file_stream
+
+def fetch_all_deps_report(term):
+    # собрать все отделения
+    reports = {dep_id: [] for dep_id in db.session.execute(select(Department.id)).scalars().all()}
+    # собрать все отчёты по отделению
+    for dep_id in reports:
+        reports[dep_id].append(DepartmentReportItem.query.filter_by(department_id=dep_id, term=term, academic_year=get_academic_year()).one())
+    # собрать все отчёты по зачётам по каждому отделению (учителей собирать НЕ НАДО!)
+        reports[dep_id].extend(Exam.query.filter_by(department_id=dep_id, term=term, academic_year=get_academic_year()).all())
+
+    return reports

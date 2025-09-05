@@ -4,7 +4,7 @@ from datetime import datetime
 from forms import EnsembleForm, EnsembleMemberForm, DepartmentForm, ExamTypeForm, DepartmentReportForm
 from sqlalchemy import func, select, desc, distinct
 from sqlalchemy.exc import IntegrityError
-from utils import get_deps_students, get_academic_year, get_term, generate_dep_report
+from utils import get_deps_students, get_academic_year, get_term, generate_dep_report, fetch_all_deps_report
 
 #* Модуль настроек. Что он решает:
 #* 3. Переводит учеников в следующий класс (и выпускает тех, кто в последнем классе)
@@ -229,15 +229,14 @@ def get_dep_report(dep_id, term):
 @bp.route('/departments/get_all_deps_report/term_<int:term>')
 def get_all_deps_report(term):
     # получить отделения
-    deps = Department.query.all()
+    # deps = Department.query.all()
     # собрать отчёты по классному руководству
-    teachers = Teacher.query.all()
-    teacher_class_reports = ClassReportItem.query.filter_by(term=term, academic_year=get_academic_year()).all()
-    # собрать отчёты по отделениям
-    dep_reports = DepartmentReportItem.query.filter_by(term=term, academic_year=get_academic_year()).all()
-    # вывести в документ
-    print('Отчёты по классному руководству учителей: ', teacher_class_reports)
-    print('Отчёты по отделениям: ', dep_reports)
+    # teachers = Teacher.query.all()
+    # teacher_class_reports = ClassReportItem.query.filter_by(term=term, academic_year=get_academic_year()).all()
+    # # собрать отчёты по отделениям
+    # dep_reports = DepartmentReportItem.query.filter_by(term=term, academic_year=get_academic_year()).all()
+    # # вывести в документ
+    print(fetch_all_deps_report(term))
     flash('Отчёт выведен в лог', 'success')
     return redirect(url_for('settings.departments_all'))
 
