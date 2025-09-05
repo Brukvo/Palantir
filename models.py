@@ -110,6 +110,12 @@ class Exam(db.Model):
     commission_members = db.Column(db.Text, nullable=True)
     academic_year = db.Column(db.String(9), nullable=False)  # Формат: "2024-2025"
     protocol_number = db.Column(db.Integer, nullable=False)  # Уникальный номер в рамках учебного года
+    total = db.Column(db.Integer)
+    got_best = db.Column(db.Integer)
+    got_good = db.Column(db.Integer)
+    got_avg = db.Column(db.Integer)
+    got_bad = db.Column(db.Integer)
+    got_nothing = db.Column(db.Integer)
     quality = db.Column(db.Integer)
     quantity = db.Column(db.Integer)
     

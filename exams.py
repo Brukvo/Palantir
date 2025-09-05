@@ -4,7 +4,7 @@ from models import db, Exam, Student, ExamType, Department, ExamItem, Teacher
 from wtforms import TextAreaField, StringField, SelectField
 from wtforms.validators import DataRequired
 from datetime import datetime
-from utils import generate_protocol, get_academic_year
+from utils import generate_protocol, get_academic_year, get_term
 
 bp = Blueprint('exams', __name__, url_prefix='/exams')
 
@@ -149,6 +149,7 @@ def create_step3():
             event = Exam(
                 date=datetime.fromisoformat(exam_data['date']),
                 exam_type_id=exam_data['exam_type_id'],
+                term=get_term(datetime.fromisoformat(exam_data['date'])),
                 academic_year=academic_year,
                 protocol_number=protocol_number,
                 discipline=exam_data['discipline'],
@@ -169,6 +170,30 @@ def create_step3():
                 )
                 db.session.add(exam)
             
+            exam_items = ExamItem.query.order_by(ExamItem.teacher_id).filter_by(event_id=exam.id).all()
+            grades = [exam_item.grade for exam_item in exam_items]
+            grade_counts = {
+                '5': 0,
+                '4': 0,
+                '3': 0,
+                '2': 0,
+                '1': 0
+            }
+
+            for grade in grades:
+                for gr in ['1', '2', '3', '4', '5']:
+                    if gr in grade:
+                        grade_counts[gr] += 1
+            qual = round((grade_counts['4'] + grade_counts['5']) / len(exam_items) * 100)
+            quan = round((grade_counts['4'] + grade_counts['5'] + grade_counts['3']) / len(exam_items) * 100)
+            event.quality = qual
+            event.quantity = quan
+            event.total = len(exam_items)
+            event.got_best = grade_counts['5']
+            event.got_good = grade_counts['4']
+            event.got_avg = grade_counts['3']
+            event.got_bad = grade_counts['2']
+            event.got_nothing = grade_counts['1']
             db.session.commit()
             session.pop('exam_data', None)
             flash('Зачёт успешно добавлен!', 'success')
@@ -185,31 +210,8 @@ def create_step3():
 def exam_detail(id):
     exam = Exam.query.get_or_404(id)
     exam_items = ExamItem.query.order_by(ExamItem.teacher_id).filter_by(event_id=exam.id)
-    total_students = exam_items.count()
-    
-    grades = [exam_item.grade for exam_item in exam_items]
-    grade_counts = {
-        '5': 0,
-        '4': 0,
-        '3': 0,
-        '2': 0,
-        '1': 0
-    }
-
-    for grade in grades:
-        for g in ['1', '2', '3', '4', '5']:
-            if g in grade:
-                grade_counts[g] += 1
-    qual = round((grade_counts['4'] + grade_counts['5']) / total_students * 100)
-    quan = round((grade_counts['4'] + grade_counts['5'] + grade_counts['3']) / total_students * 100)
-    props = {
-        'total': total_students,
-        'quality': qual,
-        'quantity': quan,
-        'grades': grade_counts
-    }
     title = f'Протокол №{exam.protocol_number} от {exam.date.strftime("%d.%m.%Y")}, {exam.exam_type.name.lower()}'
-    return render_template('exams/view.html', exam=exam, exam_items=exam_items, props=props, title=title)
+    return render_template('exams/view.html', exam=exam, exam_items=exam_items, title=title)
 
 @bp.route('/<int:id>/get_protocol')
 def protocol(id):

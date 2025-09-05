@@ -33,26 +33,26 @@
                 </div>
                 <div class="uk-width-1-2">
     
-                    <p>Всего сдавало {{ props['total'] }} обучающихся, из них:
+                    <p>Всего сдавало {{ exam.total }} обучающихся, из них:
                     <ul>
-                        {% if props['grades']['5'] %}
-                        <li>отлично: {{ props['grades']['5'] }}</li>
+                        {% if exam.got_best %}
+                        <li>отлично: {{ exam.got_best }}</li>
                         {% endif %}
-                        {% if props['grades']['4'] %}
-                        <li>хорошо: {{props['grades']['4']}}</li>
+                        {% if exam.got_good %}
+                        <li>хорошо: {{exam.got_good}}</li>
                         {% endif %}
-                        {% if props['grades']['3'] %}
-                        <li>удовлетворительно: {{props['grades']['3']}}</li>
+                        {% if exam.got_avg %}
+                        <li>удовлетворительно: {{exam.got_avg}}</li>
                         {% endif %}
-                        {% if props['grades']['2'] %}
-                        <li>неудовлетворительно: {{props['grades']['2']}}</li>
+                        {% if exam.got_bad %}
+                        <li>неудовлетворительно: {{exam.got_bad}}</li>
                         {% endif %}
-                        {% if props['grades']['1'] %}
-                        <li>не сдавало: {{props['grades']['1']}}</li>
+                        {% if exam.got_nothing %}
+                        <li>не сдавало: {{exam.got_nothing}}</li>
                         {% endif %}
                     </ul>
-                    Количественная успеваемость: {{ props['quality'] }}% <br>
-                    Качественная успеваемость: {{ props['quantity'] }}%
+                    Количественная успеваемость: {{ exam.quantity }}% <br>
+                    Качественная успеваемость: {{ exam.quality }}%
                     </p>
                 </div>
             </div>
