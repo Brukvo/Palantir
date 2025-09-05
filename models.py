@@ -104,7 +104,6 @@ class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)
     term = db.Column(db.Integer)
-    academic_year = db.Column(db.String(9))
     exam_type_id = db.Column(db.Integer, db.ForeignKey('exam_types.id'), nullable=False)
     discipline = db.Column(db.String(100), nullable=False)
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
