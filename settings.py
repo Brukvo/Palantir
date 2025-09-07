@@ -327,4 +327,4 @@ def subjects_reports(id):
     subject = Subject.query.get_or_404(id)
     reports = ReportItem.query.filter_by(subject_id=id).order_by(desc(ReportItem.academic_year), desc(ReportItem.term)).all()
     
-    return render_template('settings/subjects/reports.html', subject=subject, reports=reports)
+    return render_template('settings/subjects/reports.html', subject=subject, reports=reports, title=f'Все отчёты по предмету <b>"{subject.title}"</b>')

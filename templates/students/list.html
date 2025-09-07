@@ -58,7 +58,7 @@
                                     <th>Приём</th>
                                     <th>Отделение</th>
                                     <th>Класс</th>
-                                    <th>Адрес проживания</th>
+                                    <th>Преподаватель</th>
                                     <th>&nbsp;</th>
                                 </tr>
                             </thead>
@@ -69,7 +69,7 @@
                                     <td class="dep-{{student.department_id}} level-{{ student.class_level }}">{{ student.admission_year }}</td>
                                     <td class="dep-{{student.department_id}} level-{{ student.class_level }}"><a href="{{ url_for('settings.departments_view', id=student.department_id) }}">{{ student.department.title }}</a></td>
                                     <td class="uk-text-center dep-{{student.department_id}} level-{{ student.class_level }}"><span {%if student.is_deep_level %} class="uk-label uk-label-primary uk-text-bold"{% endif %}>{{ student.class_level }}/{{ student.study_years }}</span></td>
-                                    <td class="dep-{{student.department_id}} level-{{ student.class_level }}">{{ student.address }}</td>
+                                    <td class="dep-{{student.department_id}} level-{{ student.class_level }}"><a href="{{ url_for('teachers.view', id=student.lead_teacher_id) }}">{{ student.lead_teacher.short_name }}</a></td>
                                     <td class="uk-text-nowrap dep-{{student.department_id}} level-{{ student.class_level }}">
                                         <a href="{{ url_for('students.get_title_page', id=student.id) }}" class="uk-icon-button uk-text-secondary" uk-tooltip="title: скачать титульную страницу; pos: bottom;"><span uk-icon="file-text"></span></a>&nbsp;
                                         <a href="{{ url_for('students.edit', id=student.id) }}" class="uk-icon-button uk-text-primary" uk-tooltip="Редактировать"><span uk-icon="pencil"></span></a>&nbsp;

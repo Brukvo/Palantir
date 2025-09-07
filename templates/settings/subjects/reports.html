@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}{{title}} / {{super()}}{% endblock %}
+{% block title %}{{title|striptags}} / {{super()}}{% endblock %}
 
 {% block content %}
 <h2>
-    Все отчёты по предмету <b>{{subject.title}}</b>
+{{ title.replace('"', '')|safe }}
 </h2>
 {% if subject.reports %}
 <table class="uk-table uk-table-small">
