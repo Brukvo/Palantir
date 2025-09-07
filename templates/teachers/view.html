@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="uk-inline">
-<h2>{{title}}&ensp;<a href="{{ url_for('teachers.edit', id=teacher.id) }}" class="uk-icon-button uk-button-default"
+<h2>{{title}}&ensp;{% if teacher.is_combining %}<span class="uk-label">совместитель</span>{% endif %}<a href="{{ url_for('teachers.edit', id=teacher.id) }}" class="uk-icon-button uk-button-default"
         uk-icon="pencil" uk-tooltip="title: Редактировать; pos: bottom"></a>
     <a href="{{ url_for('teachers.delete', id=teacher.id) }}" class="uk-icon-button uk-button-default uk-text-danger"
         uk-icon="trash" uk-tooltip="title: Удалить; pos: bottom"></a>
@@ -17,9 +17,11 @@
                 {% if teacher.main_department_id %}<li><a href="{{ url_for('teachers.send_class_report', id=teacher.id) }}">&ensp;по классному руководству</a></li>{% endif %}
                 {#<li><a href="{{ url_for('teachers.send_report', id=teacher.id) }}">&ensp;по концерту</a></li>
                 <li><a href="{{ url_for('teachers.send_report', id=teacher.id) }}">&ensp;по конкурсу</a></li>#}
+                {% if not teacher.is_combining %}
                 <li class="uk-nav-divider"></li>
                 <li><a href="{{ url_for('teachers.send_lecture', id=teacher.id) }}">Доклад</a></li>
                 <li><a href="{{ url_for('teachers.send_open_lesson', id=teacher.id) }}">Открытый урок</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>

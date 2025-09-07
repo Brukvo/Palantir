@@ -28,7 +28,8 @@ def add():
         teacher = Teacher(
             full_name=form.full_name.data,
             short_name=f'{short_name[0]} {short_name[1][0]}. {short_name[2][0]}.',
-            main_department_id=form.main_department_id.data
+            main_department_id=form.main_department_id.data,
+            is_combining=form.is_combining.data
         )
         db.session.add(teacher)
         db.session.commit()
@@ -77,14 +78,13 @@ def edit(id):
         teacher.full_name = form.full_name.data
         teacher.short_name = f'{short_name[0]} {short_name[1][0]}. {short_name[2][0]}.'
         teacher.main_department_id = form.main_department_id.data
+        teacher.is_combining = form.is_combining.data
         db.session.commit()
         flash('Данные обновлены', 'success')
         return redirect(url_for('teachers.all'))
-    else:
-        print(form.errors)
 
     form.main_department_id.data = teacher.main_department_id
-    return render_template('teachers/edit.html', form=form, title='Редактирование преподавателя', id=id)
+    return render_template('teachers/edit.html', form=form, title='Редактирование преподавателя', teacher=teacher)
 
 @bp.route('/<int:id>/delete')
 def delete(id):
@@ -195,9 +195,6 @@ def send_class_report(id):
         print(form.errors)
         
     return render_template('teachers/add_class_report.html', form=form, title='Добавление отчёта по классному руководству', teacher=teacher)
-
-
-
 
 
 @bp.route('/<int:id>/lecture', methods=['GET', 'POST'])

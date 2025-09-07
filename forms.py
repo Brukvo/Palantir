@@ -84,6 +84,7 @@ class ExamStep3Form(FlaskForm):
 class TeacherForm(FlaskForm):
     full_name = StringField('Полное имя преподавателя', validators=[DataRequired()])
     main_department_id = SelectField('Отделение', coerce=int, choices=[(0, '- нет -')])
+    is_combining = BooleanField('совместитель', validators=[Optional()])
     submit = SubmitField('Сохранить')
 
 

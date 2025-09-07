@@ -39,8 +39,8 @@
                 {% for report in t_reports[teacher.id] %}
                 <td class="uk-text-center">{% if teacher.main_department_id %}<span class="uk-text-{% if report %}success{% else %}warning{% endif %}">●</span>{% endif %}</td>
                 {% endfor %}
-                <td>{% if teacher.main_department_id %}<span class="{% if teacher.lecture_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span>{% endif %}</td>
-                <td>{% if teacher.main_department_id %}<span class="{% if teacher.open_lesson_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span>{% endif %}</td>
+                <td>{% if teacher.main_department_id and not teacher.is_combining %}<span class="{% if teacher.lecture_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span>{% endif %}</td>
+                <td>{% if teacher.main_department_id and not teacher.is_combining %}<span class="{% if teacher.open_lesson_items %}uk-text-success{% else %}uk-text-danger{% endif %}">●</span>{% endif %}</td>
                 <td>
                     <a href="{{ url_for('teachers.edit', id=teacher.id) }}" class="uk-icon-button uk-button-default" uk-icon="pencil" uk-tooltip="title: Редактировать; pos: left"></a>
                     <a href="{{ url_for('teachers.delete', id=teacher.id) }}" class="uk-icon-button uk-button-default uk-text-danger" uk-icon="trash" uk-tooltip="title: Удалить; pos: left"></a>

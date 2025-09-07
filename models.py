@@ -35,6 +35,7 @@ class Teacher(db.Model):
     full_name = db.Column(db.String(150), nullable=False)
     short_name = db.Column(db.String(50))
     main_department_id = db.Column(db.Integer, db.ForeignKey('departments.id', name='fk_main_department_teacher'))
+    is_combining = db.Column(db.Boolean, default=False)
 
     main_department = db.relationship('Department', back_populates='teachers')
 
