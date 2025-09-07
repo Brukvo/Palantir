@@ -24,6 +24,10 @@ class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
 
+    __table_args__ = (
+        db.UniqueConstraint('title', name='uq_subject_title'),
+    )
+
 
 class Teacher(db.Model):
     __tablename__ = 'teachers'
@@ -153,7 +157,7 @@ class ClassHistory(db.Model):
 
 
 # "Отчётные" модели
-# 1. отчёт преподавателя за четверть
+# 1. отчёт преподавателя за четверть по предмету
 class ReportItem(db.Model):
     __tablename__ = 'report_items'
     id = db.Column(db.Integer, primary_key=True)
@@ -177,6 +181,7 @@ class ReportItem(db.Model):
     )
 
 
+# 1. отчёт преподавателя за четверть по классному руководству
 class ClassReportItem(db.Model):
     __tablename__ = 'class_report_items'
     id = db.Column(db.Integer, primary_key=True)

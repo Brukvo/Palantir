@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
-from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem, ClassReportItem
+from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem, ClassReportItem, Subject, ReportItem
 from datetime import datetime
-from forms import EnsembleForm, EnsembleMemberForm, DepartmentForm, ExamTypeForm, DepartmentReportForm
+from forms import EnsembleForm, EnsembleMemberForm, DepartmentForm, ExamTypeForm, DepartmentReportForm, SubjectAddForm, SubjectEditForm
 from sqlalchemy import func, select, desc, distinct
 from sqlalchemy.exc import IntegrityError
 from utils import get_deps_students, get_academic_year, get_term, generate_dep_report, fetch_all_deps_report
@@ -270,3 +270,61 @@ def attest_delete(id):
     except IntegrityError:
         flash('Есть протоколы с этим видом аттестации. Сначала удалите протоколы, затем повторите удаление вида аттестации', 'warning')
         return redirect('exams.all')
+
+# Предметы
+@bp.route('/subjects/list')
+def subjects_list():
+    subjects = Subject.query.all()
+    return render_template('settings/subjects/list.html', subjects=subjects, title='Предметы')
+
+@bp.route('/subjects/add', methods=['GET', 'POST'])
+def subjects_add():
+    form = SubjectAddForm()
+
+    if form.validate_on_submit() and request.method == 'POST':
+        try:
+            subject = Subject(title=form.title.data)
+            db.session.add(subject)
+            db.session.commit()
+            flash('Предмет добавлен', 'success')
+            return redirect(url_for('settings.subjects_list'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Такой предмет уже есть', 'warning')
+            return redirect(url_for('settings.subjects_add'))
+    
+    return render_template('settings/subjects/add.html', title='Добавление предмета', form=form)
+
+@bp.route('/subjects/<int:id>/edit', methods=['GET', 'POST'])
+def subjects_edit(id):
+    subject = Subject.query.get_or_404(id)
+    form = SubjectEditForm(obj=subject)
+
+    if form.validate_on_submit() and request.method == 'POST':
+        form.populate_obj(subject)
+        db.session.commit()
+        flash('Предмет обновлён', 'success')
+        return redirect(url_for('settings.subjects_list'))
+    
+    return render_template('settings/subjects/edit.html', title='Изменение предмета', form=form, subject=subject)
+
+@bp.route('/subjects/<int:id>/delete')
+def subjects_delete(id):
+    subject = Subject.query.get_or_404(id)
+
+    try:
+        db.session.delete(subject)
+        db.session.commit()
+        flash('Предмет удалён', 'success')
+        return redirect(url_for('settings.subjects_list'))
+    except IntegrityError:
+        db.session.rollback()
+        flash('По этому предмету есть отчёты. Сначала удалите отчёты, затем удалите предмет', 'warning')
+        return redirect(url_for('settings.subjects_list'))
+
+@bp.route('/subjects/<int:id>/reports')
+def subjects_reports(id):
+    subject = Subject.query.get_or_404(id)
+    reports = ReportItem.query.filter_by(subject_id=id).order_by(desc(ReportItem.academic_year), desc(ReportItem.term)).all()
+    
+    return render_template('settings/subjects/reports.html', subject=subject, reports=reports)

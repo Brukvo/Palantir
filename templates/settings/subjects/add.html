@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title}}</h2>
+<form action="{{ url_for('settings.subjects_add') }}" method="post" class="uk-form-horizontal">
+    {{ form.csrf_token() }}
+    <div class="uk-margin">
+        <label class="uk-form-label">{{ form.title.label }}</label>
+        <div class="uk-form-controls">
+            {{ form.title(class='uk-input uk-border-rounded') }}
+        </div>
+    </div>
+
+    <div class="uk-margin">
+    {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+    </div>
+
+</form>
+{% endblock %}

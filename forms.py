@@ -27,6 +27,16 @@ class StudentForm(FlaskForm):
     submit = SubmitField('Добавить ученика')
 
 
+class SubjectAddForm(FlaskForm):
+    title = StringField('Название предмета', validators=[DataRequired()])
+    submit = SubmitField('Добавить предмет')
+
+
+class SubjectEditForm(FlaskForm):
+    title = StringField('Новое название предмета', validators=[DataRequired()])
+    submit = SubmitField('Изменить предмет')
+
+
 class DepartmentForm(FlaskForm):
     full_name = StringField('Полное название программы', validators=[DataRequired()])
     short_name = StringField('Краткое название программы', validators=[DataRequired()])
