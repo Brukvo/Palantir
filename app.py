@@ -12,8 +12,9 @@ from exams import bp as exams
 from settings import bp as settings
 from teachers import bp as teachers
 from events import bp as events
+from departments import bp as departments
 
-from models import Teacher, Student, Department, Concert, Contest, MethodAssembly
+from models import Teacher, Student, Department, Concert, Contest, MethodAssembly, StudentStatus
 from forms import MethodAssemblyForm
 from utils import get_term, get_academic_year
 
@@ -36,6 +37,7 @@ app.register_blueprint(exams)
 app.register_blueprint(settings)
 app.register_blueprint(teachers)
 app.register_blueprint(events)
+app.register_blueprint(departments)
 
 @app.route('/favicon.ico')
 def retrieve_favicon():
@@ -49,6 +51,13 @@ def get_credentials():
     g.d = True if deps else False
     g.s = True if students else False
     g.t = True if teachers else False
+    statuses = StudentStatus.query.count()
+    if not statuses:
+        for status in ["учится", "выпущен(а)", "в академическом отпуске", "отчислен(а)"]:
+            st_status = StudentStatus(status=status)
+            db.session.add(st_status)
+        db.session.commit()
+        flash('Добавлены состояния учеников', 'success')
 
 # Главная страница
 @app.route('/')

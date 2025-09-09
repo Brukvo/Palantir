@@ -4,9 +4,9 @@
 
 {% block content %}
 <h2>{{title}}
-    <a href="{{ url_for('settings.departments_edit', id=department.id) }}" class="uk-icon-button" uk-icon="pencil"
+    <a href="{{ url_for('departments.edit', id=department.id) }}" class="uk-icon-button" uk-icon="pencil"
         uk-tooltip="title: Редактировать отделение; pos: bottom"></a>
-    <a href="{{ url_for('settings.department_report', id=department.id) }}" class="uk-icon-button" uk-icon="file-text"
+    <a href="{{ url_for('departments.report', id=department.id) }}" class="uk-icon-button" uk-icon="file-text"
         uk-tooltip="title: Сдать отчёт по успеваемости; pos: bottom"></a>
 </h2>
 {% if department.reports %}
@@ -77,7 +77,7 @@
     {% endfor %}
 </table>
 <h4>Список учеников отделения
-    <a href="{{ url_for('settings.get_students', id=department.id) }}" class="uk-icon-button" uk-icon="download"
+    <a href="{{ url_for('departments.get_students', id=department.id) }}" class="uk-icon-button" uk-icon="download"
         uk-tooltip="title: Скачать список учеников отделения; pos: bottom"></a>
 </h4>
 <table class="uk-table uk-table-small uk-table-hover">

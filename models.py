@@ -222,7 +222,7 @@ class DepartmentReportItem(db.Model):
     department = db.relationship('Department', backref='reports')
     
     __table_args__ = (
-        db.UniqueConstraint('department_id', 'academic_year', 'term', name='uq_department_report_item'),
+        db.UniqueConstraint('department_id', 'academic_year', 'term', name='uq_departments.report_item'),
     )
 
 

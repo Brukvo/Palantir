@@ -4,7 +4,7 @@
 
 {% block content %}
     <h2>{{title}}
-        <a href="{{ url_for('settings.departments_add') }}" class="uk-icon-button" uk-icon="plus" uk-tooltip="'title: Добавить отделение; pos: bottom"></a>
+        <a href="{{ url_for('departments.add') }}" class="uk-icon-button" uk-icon="plus" uk-tooltip="'title: Добавить отделение; pos: bottom"></a>
     </h2>
         <table class="uk-table uk-table-small uk-table-striped">
             <tr>
@@ -27,7 +27,7 @@
             </tr>
             {% for dep in deps %}
             <tr>
-                <td><a href="{{ url_for('settings.departments_view', id=dep.id) }}">{{ dep.title.capitalize() }}</a></td>
+                <td><a href="{{ url_for('departments.view', id=dep.id) }}">{{ dep.title.capitalize() }}</a></td>
                 <td>{{ dep.short_name }}</td>
                 <td>{{ dep.active_count }}</td>
                 <td class="uk-text-center uk-text-{% if dep_reports[dep.id][0] %}success{% else %}warning{% endif %}">●</td>
@@ -36,8 +36,8 @@
                 <td class="uk-text-center uk-text-{% if dep_reports[dep.id][3] %}success{% else %}warning{% endif %}">●</td>
                 <td class="uk-text-center uk-text-{% if dep_reports[dep.id][4] %}success{% else %}warning{% endif %}">●</td>
                 <td>
-                <a href="{{ url_for('settings.departments_edit', id=dep.id) }}" class="uk-icon-button" uk-icon="pencil" uk-tooltip="title: Редактировать отделение; pos: bottom"></a>
-                <a href="{{ url_for('settings.department_delete', id=dep.id) }}" class="uk-icon-button" uk-tooltip="title: Удалить отделение; pos: bottom"><span uk-icon="trash" class="uk-text-danger"></span></a>
+                <a href="{{ url_for('departments.edit', id=dep.id) }}" class="uk-icon-button" uk-icon="pencil" uk-tooltip="title: Редактировать отделение; pos: bottom"></a>
+                <a href="{{ url_for('departments.delete', id=dep.id) }}" class="uk-icon-button" uk-tooltip="title: Удалить отделение; pos: bottom"><span uk-icon="trash" class="uk-text-danger"></span></a>
                 </td>
             </tr>
             {% endfor %}
@@ -46,7 +46,7 @@
                 <td></td>
                 <td></td>
                 {% for t in range(1, 6) %}
-                <td class="uk-text-center">{% if is_reportable[t] %}<a href="{{ url_for('settings.get_all_deps_report', term=t) }}" class="uk-icon-button " uk-icon="file-text" uk-tooltip="Выгрузить отчёт за четверть по всем отделениям"></a>{% else %}&mdash;{% endif %}</td>
+                <td class="uk-text-center">{% if is_reportable[t] %}<a href="{{ url_for('settings.get_all_departments.report', term=t) }}" class="uk-icon-button " uk-icon="file-text" uk-tooltip="Выгрузить отчёт за четверть по всем отделениям"></a>{% else %}&mdash;{% endif %}</td>
                 {% endfor %}
                 <td></td>
             </tr>

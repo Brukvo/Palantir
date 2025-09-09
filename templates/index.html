@@ -6,7 +6,7 @@
 <br>
 {% if not deps %}
 <div class="uk-alert uk-alert-warning">
-<p>В базе не найдены отделения. Перед началом работы необходимо <a href="{{ url_for('settings.departments_add') }}">добавить хотя бы одно отделение</a> в базу данных. <span class="uk-text-bold uk-text-danger">Без этого система не будет работать!</span></p>
+<p>В базе не найдены отделения. Перед началом работы необходимо <a href="{{ url_for('departments.add') }}">добавить хотя бы одно отделение</a> в базу данных. <span class="uk-text-bold uk-text-danger">Без этого система не будет работать!</span></p>
 </div>
 {% endif %}
 {% if not teachers %}

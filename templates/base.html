@@ -18,7 +18,7 @@
                     <li><a href="/"><span class="uk-icon uk-icon-image" style="background-image: url({{url_for('static', filename='images/favicon.png')}})"></span></a></li>
                     {% if g.t %}<li><a href="{{ url_for('students.all') }}">Ученики</a></li>{% endif %}
                     {% if g.d %}<li><a href="{{ url_for('teachers.all') }}">Преподаватели</a></li>{% endif %}
-                    <li><a href="{{ url_for('settings.departments_all')}}">Отделения</a></li>
+                    <li><a href="{{ url_for('departments.all')}}">Отделения</a></li>
                     {% if g.s %}<li><a href="{{ url_for('students.ensembles_all') }}">Коллективы</a></li>{% endif %}
                     {% if g.s %}<li><a href="{{ url_for('events.all_events') }}">События</a></li>{% endif %}
                     <li><a href="#">Управление</a>

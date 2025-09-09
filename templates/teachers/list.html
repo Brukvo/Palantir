@@ -13,7 +13,7 @@
                 <th></th>
                 <th></th>
                 <th></th>
-                <th colspan="5" class="uk-text-center">Классное руководство</th>
+                <th colspan="5" class="uk-text-center uk-table-shrink">Классное руководство</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -34,7 +34,7 @@
             {% for teacher in teachers %}
             <tr>
                 <td><a href="{{ url_for('teachers.view', id=teacher.id) }}">{{ teacher.full_name }}</a></td>
-                <td><a href="{{ url_for('settings.departments_view', id=teacher.main_department_id) }}">{{ teacher.main_department.title }}</a></td>
+                <td><a href="{{ url_for('departments.view', id=teacher.main_department_id) }}">{{ teacher.main_department.title }}</a></td>
                 <td>{% if teacher.main_department_id %}{{ teacher.students|count }}{% endif %}</td>
                 {% for report in t_reports[teacher.id] %}
                 <td class="uk-text-center">{% if teacher.main_department_id %}<span class="uk-text-{% if report %}success{% else %}warning{% endif %}">●</span>{% endif %}</td>

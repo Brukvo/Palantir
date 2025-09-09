@@ -26,7 +26,7 @@
         </div>
     </div>
 </h2>
-{% if teacher.main_department_id %}<h4>Преподаватель отделения <a href="{{ url_for('settings.departments_view', id=teacher.main_department_id) }}"><b>{{ teacher.main_department.title }}</b></a></h4>{% endif %}
+{% if teacher.main_department_id %}<h4>Преподаватель отделения <a href="{{ url_for('departments.view', id=teacher.main_department_id) }}"><b>{{ teacher.main_department.title }}</b></a></h4>{% endif %}
 </div>
 <ul uk-accordion="multiple: true">
     {% if teacher.reports %}

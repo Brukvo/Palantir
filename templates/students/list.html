@@ -7,7 +7,7 @@
         <h2 class="uk-header">{{ title }}
         <a href="{{ url_for('students.add') }}" class="uk-icon-button uk-border-circle uk-button-primary" uk-icon="plus" uk-tooltip="title: Добавить ученика; pos: bottom"></a>
         <a href="{{ url_for('students.get_all_title_pages') }}" uk-icon="file-text" class="uk-icon-button" uk-tooltip="title: Скачать титульные страницы для всех учеников; pos: bottom"></a>
-        <a href="{{ url_for('settings.get_all_students') }}" class="uk-icon-button" uk-icon="download" uk-tooltip="title: Выгрузить полный список учеников; pos: bottom"></a>
+        <a href="{{ url_for('departments.get_all_students') }}" class="uk-icon-button" uk-icon="download" uk-tooltip="title: Выгрузить полный список учеников; pos: bottom"></a>
         {% if is_leveling %}
         <a href="{{ url_for('students.do_level_up') }}" class="uk-icon-button uk-button-danger" uk-icon="bolt" uk-tooltip="title: Перевести/выпустить учеников; pos: bottom"></a>
         {% endif %}
@@ -55,20 +55,20 @@
                             <thead>
                                 <tr>
                                     <th class="uk-table-expand">ФИО ребёнка</th>
-                                    <th>Приём</th>
+                                    <th class="uk-text-center">Приём</th>
                                     <th>Отделение</th>
-                                    <th>Класс</th>
+                                    <th class="uk-text-center">Класс</th>
                                     <th>Преподаватель</th>
-                                    <th>&nbsp;</th>
+                                    <th class="uk-text-center">Действия</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for student in students %}
                                 <tr class="js-filter">
                                     <td class="dep-{{student.department_id}} level-{{ student.class_level }}"><a href="{{ url_for('students.view', id=student.id) }}">{{ student.short_name }}</a></td>
-                                    <td class="dep-{{student.department_id}} level-{{ student.class_level }}">{{ student.admission_year }}</td>
-                                    <td class="dep-{{student.department_id}} level-{{ student.class_level }}"><a href="{{ url_for('settings.departments_view', id=student.department_id) }}">{{ student.department.title }}</a></td>
-                                    <td class="uk-text-center dep-{{student.department_id}} level-{{ student.class_level }}"><span {%if student.is_deep_level %} class="uk-label uk-label-primary uk-text-bold"{% endif %}>{{ student.class_level }}/{{ student.study_years }}</span></td>
+                                    <td class="dep-{{student.department_id}} level-{{ student.class_level }} uk-text-center">{{ student.admission_year }}</td>
+                                    <td class="dep-{{student.department_id}} level-{{ student.class_level }}"><a href="{{ url_for('departments.view', id=student.department_id) }}">{{ student.department.title }}</a></td>
+                                    <td class="uk-text-center dep-{{student.department_id}} level-{{ student.class_level }} uk-text-center"><span {%if student.is_deep_level %} class="uk-label uk-label-primary uk-text-bold"{% endif %}>{{ student.class_level }}/{{ student.study_years }}</span></td>
                                     <td class="dep-{{student.department_id}} level-{{ student.class_level }}"><a href="{{ url_for('teachers.view', id=student.lead_teacher_id) }}">{{ student.lead_teacher.short_name }}</a></td>
                                     <td class="uk-text-nowrap dep-{{student.department_id}} level-{{ student.class_level }}">
                                         <a href="{{ url_for('students.get_title_page', id=student.id) }}" class="uk-icon-button uk-text-secondary" uk-tooltip="title: скачать титульную страницу; pos: bottom;"><span uk-icon="file-text"></span></a>&nbsp;
@@ -159,7 +159,7 @@
                     <tr>
                         <td><a href="{{ url_for('students.view', id=s.id) }}">{{ s.short_name }}</a></td>
                         <td>{{ s.admission_year }}</td>
-                        <td><a href="{{ url_for('settings.departments_view', id=s.department_id) }}">{{ s.department.title }}</a></td>
+                        <td><a href="{{ url_for('departments.view', id=s.department_id) }}">{{ s.department.title }}</a></td>
                         <td><a href="{{ url_for('teachers.view', id=s.lead_teacher_id) }}">{{ s.lead_teacher.short_name }}</a></td>
                         <td>{{ s.class_level }}/{{ s.study_years }}</td>
                     </tr>
