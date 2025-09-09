@@ -12,14 +12,14 @@
 <table class="uk-table uk-table-striped">
     <tr>
         <th>Предмет</th>
-        <th>Отчётов по предмету</th>
-        <th>Действия</th>
+        <th>Отчётов</th>
+        <th class="uk-text-center">Действия</th>
     </tr>
     {% for subject in subjects %}
     <tr>
         <td><a href="{{ url_for('settings.subjects_reports', id=subject.id) }}">{{ subject.title }}</a></td>
         <td>{{ subject.reports|count }}</td>
-        <td>
+        <td class="uk-text-center">
             <a href="{{ url_for('settings.subjects_edit', id=subject.id) }}" class="uk-icon-button" uk-tooltip="Изменить предмет <b>{{subject.title}}</b>" uk-icon="pencil"></a>
             <a href="{{ url_for('settings.subjects_delete', id=subject.id) }}" class="uk-icon-button uk-text-danger" uk-tooltip="Удалить предмет <b>{{subject.title}}</b>" uk-icon="trash"></a>
         </td>
