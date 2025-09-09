@@ -46,7 +46,7 @@
                 <td></td>
                 <td></td>
                 {% for t in range(1, 6) %}
-                <td class="uk-text-center">{% if is_reportable[t] %}<a href="{{ url_for('settings.get_all_departments.report', term=t) }}" class="uk-icon-button " uk-icon="file-text" uk-tooltip="Выгрузить отчёт за четверть по всем отделениям"></a>{% else %}&mdash;{% endif %}</td>
+                <td class="uk-text-center">{% if is_reportable[t] %}<a href="{{ url_for('departments.get_all_deps_report', term=t) }}" class="uk-icon-button " uk-icon="file-text" uk-tooltip="Выгрузить отчёт за четверть по всем отделениям"></a>{% else %}&mdash;{% endif %}</td>
                 {% endfor %}
                 <td></td>
             </tr>

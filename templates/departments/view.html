@@ -35,7 +35,7 @@
         <td>{{report.got_bad}}</td>
         <td>{{report.quantity}}</td>
         <td>{{report.quality}}</td>
-        <td><a href="{{ url_for('settings.get_dep_report', dep_id=department.id, term=report.term) }}"
+        <td><a href="{{ url_for('departments.get_dep_report', dep_id=department.id, term=report.term) }}"
                 class="uk-icon-button" uk-icon="file-text"></a></td>
     </tr>
     {% endfor %}
