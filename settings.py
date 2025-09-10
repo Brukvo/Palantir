@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
-from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem, ClassReportItem, Subject, ReportItem
+from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem, ClassReportItem, Subject, ReportItem, Concert, Contest, MethodAssembly, OpenLessonItem, LectureItem, ExamItem, Exam
 from datetime import datetime
 from forms import EnsembleForm, EnsembleMemberForm, DepartmentForm, ExamTypeForm, DepartmentReportForm, SubjectAddForm, SubjectEditForm
-from sqlalchemy import func, select, desc, distinct
+from sqlalchemy import func, select, desc, distinct, text
 from sqlalchemy.exc import IntegrityError
 from utils import get_deps_students, get_academic_year, get_term, generate_dep_report, fetch_all_deps_report
 
@@ -16,7 +16,6 @@ bp = Blueprint('settings', __name__, url_prefix='/settings')
 @bp.route('/')
 def all():
     return render_template('settings/index.html')
-
 
 
 @bp.route('/attest')
@@ -106,3 +105,37 @@ def subjects_reports(id):
     reports = ReportItem.query.filter_by(subject_id=id).order_by(desc(ReportItem.academic_year), desc(ReportItem.term)).all()
     
     return render_template('settings/subjects/reports.html', subject=subject, reports=reports, title=f'Все отчёты по предмету <b>"{subject.title}"</b>')
+
+@bp.route('/clear_db')
+def clear_db():
+    objects = []
+    for classes in [DepartmentReportItem.query.all(), ReportItem.query.all(), ClassReportItem.query.all(), ConcertParticipation.query.all(), Concert.query.all(), ContestParticipation.query.all(), Contest.query.all(), EnsembleMember.query.all(), Ensemble.query.all(), LectureItem.query.all(), OpenLessonItem.query.all(), MethodAssembly.query.all(), ExamItem.query.all(), Exam.query.all(), ExamType.query.all(), OpenLessonItem.query.all(), Subject.query.all(), Student.query.all(), Teacher.query.all(), Department.query.all()]:
+        objects.extend(classes)
+    try:
+        for item in objects:
+            db.session.delete(item)
+        db.session.commit()
+    except IntegrityError:
+        flash('Не удалось удалить все данные. Проерьте порядок удаления данных', 'danger')
+        return redirect(url_for('settings.all'))
+    
+    flash('База данных успешно очищена', 'success')
+    return redirect(url_for('settings.all'))
+
+@bp.route('/fill_db')
+def fill_db():
+    from extensions import test_deps, test_students, test_subjects, test_teachers
+    try:
+        db.session.execute(text(test_deps))
+        db.session.execute(text(test_teachers))
+        db.session.execute(text(test_students))
+        db.session.execute(text(test_subjects))
+        for s in Student.query.all():
+            s.short_name = f'{s.full_name.split(" ")[0]} {s.full_name.split(" ")[1]}'
+        db.session.commit()
+    except IntegrityError:
+        flash('Не удалось заполнить базу данных. Проверьте порядок заполнения таблиц', 'danger')
+        return redirect(url_for('settings.all'))
+    
+    flash('База данных успешно заполнена тестовыми данными', 'success')
+    return redirect(url_for('settings.all'))
