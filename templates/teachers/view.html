@@ -195,7 +195,7 @@
                     {% set total_performances = total_concerts + total_contests %}
                     <tr>
                         <td><a href="{{ url_for('students.view', id=student.id) }}">{{ student.short_name }}</a></td>
-                        <td class="uk-text-center"><span {%if student.is_deep_level %} class="uk-label uk-label-warning"{% endif %}>{{ student.class_level }}/{{ student.study_years }}</span></td>
+                        <td class="uk-text-center"><span {%if student.is_deep_level %} class="uk-label uk-label-primary"{% endif %}>{{ student.class_level }}/{{ student.study_years }}</span></td>
                         <td class="uk-text-center">{{ student.concert_participations|count }} / {{ student.ensemble_participations|count }} / <b>{{ total_concerts }}</b></td>
                         <td class="uk-text-center">{{ student.contest_participations|count }} / {{ student.contest_ens_participations|count }} / <b>{{ total_contests }}</b></td>
                         <td><span class="uk-text-bold {% if total_performances >= 3 %}uk-text-success{% elif total_performances == 2 %}uk-text-warning{% endif %}">{{ total_performances }}</span></td>
