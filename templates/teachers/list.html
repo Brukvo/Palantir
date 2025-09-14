@@ -8,8 +8,9 @@
         {% if not teachers %}
         <p>В базе данных не зарегистрировано ни одного преподавателя</p>
         {% else %}
-        <table class="uk-table uk-table-small uk-table-striped uk-table-hover">
+        <table class="uk-table uk-table-striped uk-table-hover">
             <tr>
+                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -20,6 +21,7 @@
                 <th></th>
             </tr>
             <tr>
+                <th></th>
                 <th>Преподаватель</th>
                 <th class="uk-text-center">Отделение</th>
                 <th class="uk-text-center">Учеников</th>
@@ -35,6 +37,7 @@
             </tr>
             {% for teacher in teachers %}
             <tr>
+                <td class="uk-table-shrink">{% if teacher.is_combining %}<span class="uk-text-primary" uk-tooltip="Совместитель">●</span>{% endif %}</td>
                 <td><a href="{{ url_for('teachers.view', id=teacher.id) }}">{{ teacher.full_name }}</a></td>
                 <td class="uk-text-center"><a href="{{ url_for('departments.view', id=teacher.main_department_id) }}">{{ teacher.main_department.title }}</a></td>
                 <td class="uk-text-center">{% if teacher.main_department_id %}{{ teacher.students|count }}{% endif %}</td>

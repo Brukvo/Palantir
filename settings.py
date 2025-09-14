@@ -15,7 +15,7 @@ bp = Blueprint('settings', __name__, url_prefix='/settings')
 
 @bp.route('/')
 def all():
-    return render_template('settings/index.html')
+    return render_template('settings/index.html', title='Настройки')
 
 
 @bp.route('/attest')

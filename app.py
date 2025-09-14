@@ -72,12 +72,12 @@ def get_credentials():
 @app.route('/')
 def index():
     teachers = Teacher.query.count()
-    bodies = db.session.execute(select(func.count(distinct(Student.full_name))).filter(Student.status_id==1)).scalar_one()
-    students = Student.query.count()
+    bodies = db.session.execute(select(func.count(distinct(Student.full_name))).filter(Student.status_id.in_([1, 3]))).scalar_one()
+    students = Student.query.filter_by(status_id=1).count()
     deps = Department.query.count()
     concerts = Concert.query.filter(Concert.term==get_term()).order_by(Concert.date).all()
     contests = Contest.query.filter(Contest.term==get_term()).order_by(Contest.date).all()
-    return render_template('index.html', teachers=teachers, bodies=bodies, students=students, deps=deps, concerts=concerts, contests=contests)
+    return render_template('index.html', teachers=teachers, bodies=bodies, students=students, deps=deps, concerts=concerts, contests=contests, title='Главная')
 
 
 @app.route('/method')

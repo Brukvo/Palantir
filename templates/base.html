@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>{% block title %}Методический уголок{% endblock %}</title>
+    <title>{% block title %}Палантир{% endblock %}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/uikit.css') }}" />
@@ -10,7 +10,7 @@
     <script src="{{ url_for('static', filename='js/uikit-icons.js') }}"></script>
 </head>
 
-<body class="uk-background-secondary">
+<body>
     <header class="uk-section uk-section-secondary uk-section-xsmall">
         <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
             <div class="uk-navbar-center">
@@ -36,7 +36,7 @@
             </div>
         </nav>
     </header>
-    <main class="uk-section uk-section-muted">
+    <main class="uk-section uk-section-medium">
         <div class="uk-container">
         {% block content %}
             Кажется, кто-то забыл про блок <code>content</code> в шаблоне 🤔
