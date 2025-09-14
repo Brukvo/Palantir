@@ -323,7 +323,8 @@ def get_deps_students(dep_id=None):
         students = Student.query.filter(Student.department_id==dep.id).order_by(Student.class_level, Student.full_name).all()
         body.add_run(f'{dep.title.capitalize()} ({dep.short_name}):\n').bold = True
         for i, student in enumerate(students, start=1):
-            body.add_run(f'{i}. {student.full_name} ({student.class_level}/{dep.study_years})\n')
+            adv = ', углубл. уровень' if student.is_deep_level else ''
+            body.add_run(f'{i}. {student.full_name} ({student.class_level}/{student.study_years}{adv})\n')
         body.add_run('\n')
         
     # Сохранение в поток

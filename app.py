@@ -4,7 +4,7 @@ from extensions import db  # Импортируем db из extensions.py
 import os
 import locale
 from sqlalchemy import distinct, select, func, desc
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 # Импортируем Blueprint после инициализации db
 from students import bp as students
@@ -45,19 +45,28 @@ def retrieve_favicon():
 
 @app.before_request
 def get_credentials():
-    deps = Department.query.count()
-    students = Student.query.count()
-    teachers = Teacher.query.count()
-    g.d = True if deps else False
-    g.s = True if students else False
-    g.t = True if teachers else False
-    statuses = StudentStatus.query.count()
-    if not statuses:
-        for status in ["учится", "выпущен(а)", "в академическом отпуске", "отчислен(а)"]:
-            st_status = StudentStatus(status=status)
-            db.session.add(st_status)
-        db.session.commit()
-        flash('Добавлены состояния учеников', 'success')
+    try:
+        deps = Department.query.count()
+        students = Student.query.count()
+        teachers = Teacher.query.count()
+        g.d = True if deps else False
+        g.s = True if students else False
+        g.t = True if teachers else False
+        statuses = StudentStatus.query.count()
+        if not statuses:
+            for status in ["учится", "выпущен(а)", "в академическом отпуске", "отчислен(а)"]:
+                st_status = StudentStatus(status=status)
+                db.session.add(st_status)
+            db.session.commit()
+    except OperationalError:
+        migrate.db.create_all()
+        statuses = StudentStatus.query.count()
+        if not statuses:
+            for status in ["учится", "выпущен(а)", "в академическом отпуске", "отчислен(а)"]:
+                    st_status = StudentStatus(status=status)
+                    db.session.add(st_status)
+            db.session.commit()
+        flash('База данных создана', 'success')
 
 # Главная страница
 @app.route('/')

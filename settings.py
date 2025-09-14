@@ -117,10 +117,10 @@ def clear_db():
         db.session.commit()
     except IntegrityError:
         flash('Не удалось удалить все данные. Проерьте порядок удаления данных', 'danger')
-        return redirect(url_for('settings.all'))
+        return redirect(url_for('index'))
     
     flash('База данных успешно очищена', 'success')
-    return redirect(url_for('settings.all'))
+    return redirect(url_for('index'))
 
 @bp.route('/fill_db')
 def fill_db():
@@ -135,7 +135,7 @@ def fill_db():
         db.session.commit()
     except IntegrityError:
         flash('Не удалось заполнить базу данных. Проверьте порядок заполнения таблиц', 'danger')
-        return redirect(url_for('settings.all'))
+        return redirect(url_for('index'))
     
     flash('База данных успешно заполнена тестовыми данными', 'success')
-    return redirect(url_for('settings.all'))
+    return redirect(url_for('index'))
