@@ -204,23 +204,16 @@ def do_level_up():
     return redirect(url_for('students.all'))
 
 @bp.route('/<int:id>/dismiss', methods=['GET', 'POST'])
-def dismiss(id, s_id=2, reason=None):
+def dismiss(id):
     s = Student.query.get_or_404(id)
     form = DismissionForm()
 
-    if s_id == 3:
-        s.status_id = 3
-        flash(f'{s.short_name} переведен(а) в статус <b>в академическом отпуске</b>', 'success')
-        return redirect(url_for('students.all'))
-
     if form.validate_on_submit():
         form.populate_obj(s)
-        s.status_id = s_id
+        reason = form.dismission_reason.data
+        s.status_id = 4
         db.session.commit()
-        if s_id == 2:
-            flash(f'{s.short_name} успешно окончила нашу школу 🥳', 'success')
-        if s_id == 4:
-            flash(f'Ученик отчислен.{"Причина: " + reason if reason is not None else ""}', 'success')
+        flash(f'Ученик отчислен.{"Причина: " + reason if reason is not None else ""}', 'success')
         return redirect(url_for('students.all'))
     
     return render_template('students/dismission.html', form=form, student=s, title='Отчисление ученика')
@@ -245,9 +238,9 @@ def graduate(id):
 
     if form.validate_on_submit():
         form.populate_obj(s)
-        s.status_id = s_id
+        s.status_id = 2
         db.session.commit()
-        flash(f'{s.short_name} успешно окончила нашу школу 🥳', 'success')
+        flash(f'{s.short_name} успешно окончил(а) нашу школу 🥳', 'success')
         return redirect(url_for('students.all'))
     
     return render_template('students/dismission.html', form=form, student=s, title='Отчисление ученика')

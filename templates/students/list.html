@@ -74,7 +74,7 @@
                                         <a href="{{ url_for('students.get_title_page', id=student.id) }}" class="uk-icon-button uk-text-secondary" uk-tooltip="title: скачать титульную страницу; pos: bottom;"><span uk-icon="file-text"></span></a>&nbsp;
                                         <a href="{{ url_for('students.edit', id=student.id) }}" class="uk-icon-button uk-text-primary" uk-tooltip="Редактировать"><span uk-icon="pencil"></span></a>&nbsp;
                                         <a href="{{ url_for('students.limbo', id=student.id) }}" class="uk-icon-button uk-text-warning" uk-tooltip="Перевести в академ"><span uk-icon="refresh"></span></a>&nbsp;
-                                        <a href="{{ url_for('students.dismiss', id=student.id, s_id=4, reason='измените текст причины отчисления') }}" class="uk-icon-button uk-text-danger" uk-tooltip="Отчислить"><span uk-icon="sign-out"></span></a>&nbsp;
+                                        <a href="{{ url_for('students.dismiss', id=student.id, reason='измените текст причины отчисления') }}" class="uk-icon-button uk-text-danger" uk-tooltip="Отчислить"><span uk-icon="sign-out"></span></a>&nbsp;
                                         {% if student.is_graduated and (not student.dismission_reason or student.dismission_reason == '') %}
                                         <a href="{{ url_for('students.graduate', id=student.id) }}" class="uk-icon-button uk-button-warning" uk-tooltip="Выпустить"><span uk-icon="flash"></span></a>
                                         {% endif %}
@@ -128,7 +128,8 @@
                         <th>Отделение</th>
                         <th>Преподаватель</th>
                         <th>Срок</th>
-                        <th>Причина</th>
+                        <th>Дата отчисления</th>
+                        <th>Причина отчисления</th>
                     </tr>
                     {% for s in dismissed %}
                     <tr>
@@ -137,6 +138,7 @@
                         <td>{{ s.department.title }}</td>
                         <td>{{ s.lead_teacher.short_name }}</td>
                         <td>{{ s.study_years }} л.</td>
+                        <td>{{ s.dismission_date.strftime('%d.%m.%Y') }}</td>
                         <td>{{ s.dismission_reason }}</td>
                     </tr>
                     {% endfor %}

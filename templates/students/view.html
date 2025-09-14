@@ -13,7 +13,8 @@
         uk-tooltip="Сформировать титульную страницу для личного дела"></a>
     <a href="{{ url_for('students.edit', id=student.id) }}" class="uk-icon-button uk-border-circle"
         uk-icon="pencil" uk-tooltip="Редактировать"></a>
-    <a href="{{ url_for('students.dismiss', id=student.id, s_id=3) }}" class="uk-icon-button uk-border-circle uk-text-danger" uk-tooltip="Перевести в академический отпуск"><span uk-icon="sign-out"></span></a>
+    <a href="{{ url_for('students.limbo', id=student.id) }}" class="uk-icon-button uk-text-warning" uk-tooltip="Перевести в академ" uk-icon="refresh"></a>
+    <a href="{{ url_for('students.dismiss', id=student.id, reason='') }}" class="uk-icon-button uk-border-circle uk-text-danger" uk-tooltip="Отчислить"><span uk-icon="sign-out"></span></a>
 </h2>
 <h4>{{ student.department.short_name }}, {{ student.class_level }}/{{ student.study_years}}
     {% if student.is_deep_level %}<span class="uk-label uk-label-primary">углубленный уровень</span>{% endif %}
