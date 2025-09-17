@@ -7,6 +7,13 @@
 {% endblock %}
 
 
+Форма:
+<form action="{{ url_for('settings.school_info') }}" method="post" class="uk-form-horizontal">
+{{ form.csrf_token() }}
+
+</form>
+
+
 Поле формы:
 <div class="uk-margin">
     <label class="uk-form-label">{{ form..label }}</label>

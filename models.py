@@ -416,6 +416,6 @@ class School(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_title = db.Column(db.String, nullable=False)
     short_title = db.Column(db.String, nullable=False)
-    region_id = db.Column(db.Integer, nullable=False)
+    region_id = db.Column(db.Integer, db.ForeignKey('regions.id'), nullable=False)
 
     region = db.relationship('Region')

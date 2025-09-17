@@ -6,16 +6,22 @@
         <h2>Настройки</h2>
 
         <h3 class="uk-text-center">Информация о школе</h3>
-        <p class="uk-text-center">Данные в этой таблице используются для заполнения титульных страниц для личных дел, а также при формировании протоколов методических заседаний</p>
+        <p class="uk-text-center">Данные в этой таблице используются для заполнения титульных страниц для личных дел, а также при формировании протоколов методических заседаний.{% if school is none %} Но данные о школе отсутствуют в базе данных, поэтому Вам необходимо внести их по ссылке ниже.{% endif %}</p>
         <table class="uk-table uk-table-small">
-            {% for i in ['Полное наименование ОУ', 'Сокращённое наименование ОУ'] %}
             <tr>
-                <td class="uk-text-right"><span class="uk-text-bold">{{ i }}</span></td>
-                <td>{% if not i %}(не указано){% else %}{{ i }}{% endif %}</td>
+                <td><span class="uk-text-bold">Полное наименование ОУ</span></td>
+                <td>{% if school.full_title %}{{ school.full_title }}{% else %}(не задано){% endif %}</td>
             </tr>
-            {% endfor %}
+            <tr>
+                <td><span class="uk-text-bold">Сокращённое наименование ОУ</span></td>
+                <td>{% if school.short_title %}{{ school.short_title }}{% else %}(не задано){% endif %}</td>
+            </tr>
+            <tr>
+                <td><span class="uk-text-bold" uk-tooltip="Используется только для статистики">Субъект</span></td>
+                <td>{% if school.region_id %}{{ school.region.name }}{% else %}(не задано){% endif %}</td>
+            </tr>
         </table>
-        <a href="#" class="uk-text-center">Изменить данные</a>
+        <a href="{{ url_for('settings.school_info') }}" class="uk-text-center">Изменить данные</a>
         
         <hr class="uk-hr-divider uk-margin-large">
         

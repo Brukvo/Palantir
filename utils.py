@@ -434,5 +434,8 @@ def fetch_all_deps_report(term):
         reports[dep_id].append(DepartmentReportItem.query.filter_by(department_id=dep_id, term=term, academic_year=get_academic_year()).one())
     # собрать все отчёты по зачётам по каждому отделению (учителей собирать НЕ НАДО!)
         reports[dep_id].extend(Exam.query.filter_by(department_id=dep_id, term=term, academic_year=get_academic_year()).all())
-
+    # создаём и настраиваем документ
+    # добавляем заголовок
+    # добавляем отчёт по отделению, а следом за ним
+    # результаты зачётов и экзаменов на этом отделении
     return reports

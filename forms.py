@@ -194,3 +194,10 @@ class ContestPartForm(FlaskForm):
     ensemble_id = SelectField('Коллектив', coerce=int, choices=[(0, '- нет -')], validators=[Optional()])
     result = StringField('Результат', validators=[DataRequired()])
     submit = SubmitField('Сохранить')
+
+
+class SchoolForm(FlaskForm):
+    full_title = StringField('Полное наименование ОУ', validators=[DataRequired()])
+    short_title = StringField('Сокращённое наименование ОУ', validators=[DataRequired()])
+    region_id = SelectField('Субъект', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Сохранить изменения')

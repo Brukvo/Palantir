@@ -1,21 +1,41 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
-from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem, ClassReportItem, Subject, ReportItem, Concert, Contest, MethodAssembly, OpenLessonItem, LectureItem, ExamItem, Exam
-from datetime import datetime
-from forms import EnsembleForm, EnsembleMemberForm, DepartmentForm, ExamTypeForm, DepartmentReportForm, SubjectAddForm, SubjectEditForm
-from sqlalchemy import func, select, desc, distinct, text
-from sqlalchemy.exc import IntegrityError
-from utils import get_deps_students, get_academic_year, get_term, generate_dep_report, fetch_all_deps_report
-
-#* Модуль настроек. Что он решает:
-#* 3. Переводит учеников в следующий класс (и выпускает тех, кто в последнем классе)
-#* 4. Управляет списком преподавателей
-#! 5. Управляет учебными программами
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, ConcertParticipation, ContestParticipation, ExamType, DepartmentReportItem, ClassReportItem, Subject, ReportItem, Concert, Contest, MethodAssembly, OpenLessonItem, LectureItem, ExamItem, Exam, School, Region
+from forms import ExamTypeForm, SubjectAddForm, SubjectEditForm, SchoolForm
+from sqlalchemy import desc, text
+from sqlalchemy.exc import IntegrityError, MultipleResultsFound
 
 bp = Blueprint('settings', __name__, url_prefix='/settings')
 
 @bp.route('/')
 def all():
-    return render_template('settings/index.html', title='Настройки')
+    try:
+        school = School.query.one_or_none()
+    except MultipleResultsFound:
+        school = School.query.all()[-1]
+    return render_template('settings/index.html', title='Настройки', school=school)
+
+@bp.route('/school_info', methods=['GET', 'POST'])
+def school_info():
+    school = School.query.one_or_none()
+    if school is not None:
+        form = SchoolForm(obj=school)
+        form.region_id.choices = [(r.id, r.name) for r in Region.query.all()]
+        form.region_id.data = school.region_id
+    else:
+        form = SchoolForm()
+        form.region_id.choices = [(r.id, r.name) for r in Region.query.all()]
+
+    if form.validate_on_submit() and request.method == 'POST':
+        if school is None:
+            school = School(full_title=form.full_title.data, short_title=form.short_title.data, region_id=form.region_id.data)
+            db.session.add(school)
+        else:
+            form.populate_obj(school)
+        db.session.commit()
+        flash('Данные о школе успешно обновлены', 'success')
+        return redirect(url_for('settings.all'))
+
+    return render_template('settings/school_info.html', form=form, school=school, title=f'{"Добавление" if school is None else "Изменение"} информации о школе')
 
 
 @bp.route('/attest')
@@ -109,7 +129,7 @@ def subjects_reports(id):
 @bp.route('/clear_db')
 def clear_db():
     objects = []
-    for classes in [DepartmentReportItem.query.all(), ReportItem.query.all(), ClassReportItem.query.all(), ConcertParticipation.query.all(), Concert.query.all(), ContestParticipation.query.all(), Contest.query.all(), EnsembleMember.query.all(), Ensemble.query.all(), LectureItem.query.all(), OpenLessonItem.query.all(), MethodAssembly.query.all(), ExamItem.query.all(), Exam.query.all(), ExamType.query.all(), OpenLessonItem.query.all(), Subject.query.all(), Student.query.all(), Teacher.query.all(), Department.query.all()]:
+    for classes in [DepartmentReportItem.query.all(), ReportItem.query.all(), ClassReportItem.query.all(), ConcertParticipation.query.all(), Concert.query.all(), ContestParticipation.query.all(), Contest.query.all(), EnsembleMember.query.all(), Ensemble.query.all(), LectureItem.query.all(), OpenLessonItem.query.all(), MethodAssembly.query.all(), ExamItem.query.all(), Exam.query.all(), ExamType.query.all(), OpenLessonItem.query.all(), Subject.query.all(), Student.query.all(), Teacher.query.all(), Department.query.all(), School.query.all()]:
         objects.extend(classes)
     try:
         for item in objects:
@@ -124,12 +144,14 @@ def clear_db():
 
 @bp.route('/fill_db')
 def fill_db():
-    from extensions import test_deps, test_students, test_subjects, test_teachers
+    from extensions import test_deps, test_students, test_subjects, test_teachers, test_region, test_school
     try:
         db.session.execute(text(test_deps))
         db.session.execute(text(test_teachers))
         db.session.execute(text(test_students))
         db.session.execute(text(test_subjects))
+        db.session.execute(text(test_region))
+        db.session.execute(text(test_school))
         for s in Student.query.all():
             s.short_name = f'{s.full_name.split(" ")[0]} {s.full_name.split(" ")[1]}'
         db.session.commit()
