@@ -404,3 +404,18 @@ class EnsembleMember(db.Model):
     ensemble = db.relationship('Ensemble', back_populates='membership_records')
     student = db.relationship('Student', back_populates='ensemble_memberships')
 
+
+class Region(db.Model):
+    __tablename__ = 'regions'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+
+
+class School(db.Model):
+    __tablename__ = 'school_info'
+    id = db.Column(db.Integer, primary_key=True)
+    full_title = db.Column(db.String, nullable=False)
+    short_title = db.Column(db.String, nullable=False)
+    region_id = db.Column(db.Integer, nullable=False)
+
+    region = db.relationship('Region')
