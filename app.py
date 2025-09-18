@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from extensions import db  # Импортируем db из extensions.py
 import os
 import locale
-from sqlalchemy import distinct, select, func, desc
+from sqlalchemy import distinct, select, func, desc, text
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 # Импортируем Blueprint после инициализации db
@@ -14,7 +14,7 @@ from teachers import bp as teachers
 from events import bp as events
 from departments import bp as departments
 
-from models import Teacher, Student, Department, Concert, Contest, MethodAssembly, StudentStatus
+from models import Teacher, Student, Department, Concert, Contest, MethodAssembly, StudentStatus, Region
 from forms import MethodAssemblyForm
 from utils import get_term, get_academic_year
 
@@ -53,11 +53,16 @@ def get_credentials():
         g.s = True if students else False
         g.t = True if teachers else False
         statuses = StudentStatus.query.count()
+        regions = Region.query
         if not statuses:
             for status in ["учится", "выпущен(а)", "в академическом отпуске", "отчислен(а)"]:
                 st_status = StudentStatus(status=status)
                 db.session.add(st_status)
-            db.session.commit()
+        if not regions.all() or regions.count() != 91:
+            from extensions import regions as regions_list
+            db.session.execute(text('DELETE FROM regions'))
+            db.session.execute(text(regions_list))
+        db.session.commit()
     except OperationalError:
         migrate.db.create_all()
         statuses = StudentStatus.query.count()
@@ -65,7 +70,12 @@ def get_credentials():
             for status in ["учится", "выпущен(а)", "в академическом отпуске", "отчислен(а)"]:
                     st_status = StudentStatus(status=status)
                     db.session.add(st_status)
-            db.session.commit()
+        regions = Region.query
+        if not regions.all() or regions.count() != 91:
+            from extensions import regions as regions_list
+            db.session.execute(text('DELETE FROM regions'))
+            db.session.execute(text(regions_list))
+        db.session.commit()
         flash('База данных создана', 'success')
 
 # Главная страница

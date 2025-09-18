@@ -19,16 +19,15 @@ def school_info():
     school = School.query.one_or_none()
     if school is not None:
         form = SchoolForm(obj=school)
-        form.region_id.choices = [(r.id, r.name) for r in Region.query.all()]
-        form.region_id.data = school.region_id
     else:
         form = SchoolForm()
-        form.region_id.choices = [(r.id, r.name) for r in Region.query.all()]
+    form.region_id.choices = [(r.id, r.name) for r in Region.query.order_by(Region.name).all()]
 
     if form.validate_on_submit() and request.method == 'POST':
         if school is None:
             school = School(full_title=form.full_title.data, short_title=form.short_title.data, region_id=form.region_id.data)
             db.session.add(school)
+            db.session.commit()
         else:
             form.populate_obj(school)
         db.session.commit()
@@ -144,13 +143,12 @@ def clear_db():
 
 @bp.route('/fill_db')
 def fill_db():
-    from extensions import test_deps, test_students, test_subjects, test_teachers, test_region, test_school
+    from extensions import test_deps, test_students, test_subjects, test_teachers, test_school
     try:
         db.session.execute(text(test_deps))
         db.session.execute(text(test_teachers))
         db.session.execute(text(test_students))
         db.session.execute(text(test_subjects))
-        db.session.execute(text(test_region))
         db.session.execute(text(test_school))
         for s in Student.query.all():
             s.short_name = f'{s.full_name.split(" ")[0]} {s.full_name.split(" ")[1]}'
@@ -161,3 +159,14 @@ def fill_db():
     
     flash('База данных успешно заполнена тестовыми данными', 'success')
     return redirect(url_for('index'))
+
+@bp.route('/fill_regions')
+def fill_regions():
+    from extensions import regions
+    from models import Region
+    regions_list = Region.query.all()
+    if regions_list:
+        for region in regions_list:
+            db.session.delete(region)
+            db.session.commit()
+    db.session.execute(text(regions))
