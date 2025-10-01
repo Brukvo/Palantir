@@ -20,6 +20,10 @@
                 <td><span class="uk-text-bold" uk-tooltip="Используется только для статистики">Субъект</span></td>
                 <td>{% if school.region_id %}{{ school.region.name }}{% else %}(не задано){% endif %}</td>
             </tr>
+            <tr>
+                <td><span class="uk-text-bold">Зав. метод. объединения</span></td>
+                <td>{% if school.methodist_id %}{{ school.methodist.short_name }}{% else %}(не задано){% endif %}</td>
+            </tr>
         </table>
         <a href="{{ url_for('settings.school_info') }}" class="uk-text-center">Изменить данные</a>
         

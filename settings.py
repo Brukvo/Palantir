@@ -22,10 +22,11 @@ def school_info():
     else:
         form = SchoolForm()
     form.region_id.choices = [(r.id, r.name) for r in Region.query.order_by(Region.name).all()]
+    form.methodist_id.choices = [(t.id, t.short_name) for t in Teacher.query.all()]
 
     if form.validate_on_submit() and request.method == 'POST':
         if school is None:
-            school = School(full_title=form.full_title.data, short_title=form.short_title.data, region_id=form.region_id.data)
+            school = School(full_title=form.full_title.data, short_title=form.short_title.data, region_id=form.region_id.data, methodist_id=form.methodist_id.data)
             db.session.add(school)
             db.session.commit()
         else:

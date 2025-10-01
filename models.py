@@ -417,5 +417,7 @@ class School(db.Model):
     full_title = db.Column(db.String, nullable=False)
     short_title = db.Column(db.String, nullable=False)
     region_id = db.Column(db.Integer, db.ForeignKey('regions.id', name='fk_region_id_region'), nullable=False)
+    methodist_id = db.Column(db.Integer, db.ForeignKey('teachers.id', name='fk_methodist_id_teacher'))
 
     region = db.relationship('Region')
+    methodist = db.relationship('Teacher')

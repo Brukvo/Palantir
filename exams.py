@@ -159,6 +159,7 @@ def create_step3():
             db.session.add(event)
             db.session.flush()  # Получаем ID события
             
+            grades = []
             # Создаем экзамены для каждого ученика
             for student in students:
                 exam = ExamItem(
@@ -168,10 +169,9 @@ def create_step3():
                     program=getattr(form, f'program_{student.id}').data,
                     grade=getattr(form, f'grade_{student.id}').data
                 )
+                grades.append(getattr(form, f'grade_{student.id}').data)
                 db.session.add(exam)
             
-            exam_items = ExamItem.query.order_by(ExamItem.teacher_id).filter_by(event_id=exam.id).all()
-            grades = [exam_item.grade for exam_item in exam_items]
             grade_counts = {
                 '5': 0,
                 '4': 0,
@@ -184,11 +184,11 @@ def create_step3():
                 for gr in ['1', '2', '3', '4', '5']:
                     if gr in grade:
                         grade_counts[gr] += 1
-            qual = round((grade_counts['4'] + grade_counts['5']) / len(exam_items) * 100)
-            quan = round((grade_counts['4'] + grade_counts['5'] + grade_counts['3']) / len(exam_items) * 100)
+            qual = round((grade_counts['4'] + grade_counts['5']) / len(students) * 100)
+            quan = round((grade_counts['4'] + grade_counts['5'] + grade_counts['3']) / len(students) * 100)
             event.quality = qual
             event.quantity = quan
-            event.total = len(exam_items)
+            event.total = len(students)
             event.got_best = grade_counts['5']
             event.got_good = grade_counts['4']
             event.got_avg = grade_counts['3']

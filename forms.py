@@ -200,4 +200,5 @@ class SchoolForm(FlaskForm):
     full_title = StringField('Полное наименование ОУ', validators=[DataRequired()])
     short_title = StringField('Сокращённое наименование ОУ', validators=[DataRequired()])
     region_id = SelectField('Субъект', coerce=int, validators=[DataRequired()])
+    methodist_id = SelectField('Зав. метод. объединения', coerce=int, validators=[Optional()])
     submit = SubmitField('Сохранить изменения')

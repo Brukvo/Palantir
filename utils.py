@@ -1,12 +1,14 @@
 from docx import Document
-from docx.shared import Pt, Cm
+from docx.shared import Pt, Cm, Mm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_ORIENT
 from io import BytesIO
 from datetime import datetime
-from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem
+from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem, School
 from extensions import db
 from sqlalchemy import desc, select
+from sqlalchemy.exc import NoResultFound
+from flask import redirect, flash, url_for
 
 from datetime import date
 
@@ -427,6 +429,8 @@ def generate_dep_report(dep_id, term, with_title=True):
     return file_stream
 
 def fetch_all_deps_report(term):
+    # собираем данные о школе
+    school = School.query.one_or_none()
     # собрать все отделения
     reports = {dep_id: [] for dep_id in db.session.execute(select(Department.id)).scalars().all()}
     # собрать все отчёты по отделению
@@ -435,7 +439,49 @@ def fetch_all_deps_report(term):
     # собрать все отчёты по зачётам по каждому отделению (учителей собирать НЕ НАДО!)
         reports[dep_id].extend(Exam.query.filter_by(department_id=dep_id, term=term, academic_year=get_academic_year()).all())
     # создаём и настраиваем документ
+    doc = set_font(Document(), 'PT Serif', 14)
+    section = doc.sections[0]
+    section.left_margin = Mm(12)
+    section.right_margin = Mm(12)
+    section.top_margin = Mm(12)
+    section.bottom_margin = Mm(12)
+
     # добавляем заголовок
+    title = doc.add_paragraph()
+    if term in [1, 2, 3, 4]:
+        period = f'{term} четверть {get_academic_year()} учебного года'
+    else:
+        period = f'{get_academic_year()} учебный год'
+    title.add_run(f'Отчёт зав. метод. объединения [Фамилия И. О.] об успеваемости в {school.short_title} за {period}').bold = True
     # добавляем отчёт по отделению, а следом за ним
+    for dep in reports:
+        dep_report = reports[dep][0]
+        exams = reports[dep][1:]
+        dep_block_title = doc.add_paragraph()
+        dep_block_title.add_run(f'Отчёт об успеваемости на отделении "{dep_report.department.title}"').bold = True
+        dep_block = doc.add_paragraph(f'Всего на отделении обучающихся: {dep_report.total}, из них:')
+        if dep_report.got_best:
+            dep_block.add_run(f'\n\t– отлично: {dep_report.got_best}')
+        if dep_report.got_good:
+            dep_block.add_run(f'\n\t– хорошо: {dep_report.got_good}')
+        if dep_report.got_avg:
+            dep_block.add_run(f'\n\t– удовлетворительно: {dep_report.got_avg}')
+        if dep_report.got_bad:
+            dep_block.add_run(f'\n\t– неудовлетворительно: {dep_report.got_bad}')
     # результаты зачётов и экзаменов на этом отделении
-    return reports
+        for exam in exams:
+            exam_block = doc.add_paragraph()
+            exam_block.add_run(f'{exam.exam_type.name[0].upper()}{exam.exam_type.name[1:]}, результаты:').italic = True
+            exam_block.add_run(f'\nВсего сдавало обучающихся: {exam.total}, из них:')
+            if exam.got_best:
+                exam_block.add_run(f'\n\t– отлично: {exam.got_best}')
+            if exam.got_good:
+                exam_block.add_run(f'\n\t– хорошо: {exam.got_good}')
+            if exam.got_avg:
+                exam_block.add_run(f'\n\t– удовлетворительно: {exam.got_avg}')
+            if exam.got_bad:
+                exam_block.add_run(f'\n\t– неудовлетворительно: {exam.got_bad}')
+    file_stream = BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    return file_stream

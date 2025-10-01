@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
-from models import db, Student, Department, Teacher, Concert, ConcertParticipation, Contest, ContestParticipation, Ensemble, DepartmentReportItem
+from models import db, Student, Department, Teacher, Concert, ConcertParticipation, Contest, ContestParticipation, Ensemble, DepartmentReportItem, School
 from forms import DepartmentForm, DepartmentReportForm
 from utils import get_academic_year, get_term, generate_dep_report, get_deps_students, fetch_all_deps_report
 from sqlalchemy.exc import IntegrityError
@@ -226,6 +226,15 @@ def get_all_deps_report(term):
     # # собрать отчёты по отделениям
     # dep_reports = DepartmentReportItem.query.filter_by(term=term, academic_year=get_academic_year()).all()
     # # вывести в документ
-    print(fetch_all_deps_report(term))
-    flash('Отчёт выведен в лог', 'success')
-    return redirect(url_for('departments.all'))
+    # print(fetch_all_deps_report(term))
+    if School.query.one_or_none() is None:
+        flash('Не заполнены данные о школе &ndash; для этого перейдите в раздел <b>Настройки</b> в главном меню', 'warning')
+        return redirect(url_for('departments.all'))
+    file_stream = fetch_all_deps_report(term)
+    filename = f"Отчёт об успеваемости, {term}_{get_academic_year()}.docx"
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
