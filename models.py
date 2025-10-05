@@ -297,6 +297,35 @@ class MethodAssembly(db.Model):
 
     teacher = db.relationship('Teacher')
 
+class MethodAssemblyProtocol(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Базовые поля для идентификации периода
+    term = db.Column(db.Integer, nullable=False)
+    academic_year = db.Column(db.String(10), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    
+    # Основная информация о заседании
+    title = db.Column(db.String(120), nullable=False)
+    number = db.Column(db.Integer, nullable=False)  # Номер протокола
+    
+    # Ответственные лица
+    secretary_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
+    
+    # Содержание протокола
+    agenda = db.Column(db.Text, nullable=False)  # Повестка дня
+    decisions = db.Column(db.Text, nullable=False)  # Принятые решения
+    
+    # Отношения с преподавателями
+    secretary = db.relationship('Teacher', lazy=True)
+    
+    # Файл протокола
+    protocol_file = db.Column(db.String(20))
+
+    __table_args__ = (
+        db.UniqueConstraint('academic_year', 'number', name='uq_method_protocol_number'),
+    )
+
 
 # 6. конкурсы и концерты
 # Этот класс не создаёт таблицу, а служит "шаблоном"

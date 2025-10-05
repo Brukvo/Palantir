@@ -13,6 +13,7 @@ from settings import bp as settings
 from teachers import bp as teachers
 from events import bp as events
 from departments import bp as departments
+from method import bp as method
 
 from models import Teacher, Student, Department, Concert, Contest, MethodAssembly, StudentStatus, Region
 from forms import MethodAssemblyForm
@@ -38,6 +39,7 @@ app.register_blueprint(settings)
 app.register_blueprint(teachers)
 app.register_blueprint(events)
 app.register_blueprint(departments)
+app.register_blueprint(method)
 
 @app.route('/favicon.ico')
 def retrieve_favicon():
@@ -89,41 +91,6 @@ def index():
     contests = Contest.query.filter(Contest.term==get_term()).order_by(Contest.date).all()
     return render_template('index.html', teachers=teachers, bodies=bodies, students=students, deps=deps, concerts=concerts, contests=contests, title='Главная')
 
-
-@app.route('/method')
-def list_assemblies():
-    assemblies = MethodAssembly.query.filter(MethodAssembly.academic_year==get_academic_year()).all()
-    return render_template('methodic/assemblies_list.html', assemblies=assemblies, title='Заседания методического объединения')
-
-@app.route('/method/add', methods=['GET', 'POST'])
-def send_assembly():
-    form = MethodAssemblyForm()
-    teachers = Teacher.query.all()
-
-    form.teacher_id.choices = [(t.id, t.short_name) for t in teachers]
-    form.teacher_id.data = 3
-
-    if form.validate_on_submit():
-        try:
-            assembly = MethodAssembly(
-                term=get_term(),
-                academic_year=get_academic_year(),
-                date=form.date.data,
-                title=form.title.data,
-                description=form.description.data,
-                teacher_id=form.teacher_id.data
-            )
-            db.session.add(assembly)
-            db.session.commit()
-            flash('Заседание методического объединения успешно добавлено', 'success')
-            return redirect(url_for('list_assemblies'))
-        except BaseException as ie:
-            print(ie)
-            return redirect('/')
-    else:
-        print(form.errors)
-        
-    return render_template('methodic/add_method_assembly.html', form=form, title='Добавление записи в методический отчёт')
 
 @app.errorhandler(404)
 def error404(error):
