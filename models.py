@@ -306,7 +306,7 @@ class MethodAssemblyProtocol(db.Model):
     date = db.Column(db.Date, nullable=False)
     
     # Основная информация о заседании
-    title = db.Column(db.String(120), nullable=False)
+    attendees = db.Column(db.String(255), nullable=False)
     number = db.Column(db.Integer, nullable=False)  # Номер протокола
     
     # Ответственные лица

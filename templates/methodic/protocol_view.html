@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title}}
+    {% if protocol.protocol_file %}<a href="{{url_for('method.protocol_retrieve', id=protocol.id)}}" class="uk-icon-button uk-text-secondary" uk-icon="download" uk-tooltip="title: скачать протокол; pos: bottom"></a>{% endif %}
+    <a href="{{ url_for('method.protocol_delete', id=protocol.id) }}" uk-icon="trash" class="uk-icon-button uk-button-danger" uk-tooltip="title: Удалить протокол; pos: bottom"></a>
+</h2>
+<p class="uk-alert uk-alert-secondary"><b>Участвовали: </b>{{ ', '.join(protocol.attendees.split('\n')) }}</p>
+<h3>Повестка</h3>
+<p class="uk-margin-left">
+    {% for agenda in protocol.agenda.split('\n') %}
+    &ndash; {{ agenda }}<br>
+    {% endfor %}
+</p>
+<h3>Постановили</h3>
+<p class="uk-margin-left">
+    {% for decision in protocol.decisions.split('\n') %}
+    &ndash; {{ decision }}<br>
+    {% endfor %}
+</p>
+
+{% if not protocol.protocol_file %}
+<form action="{{ url_for('method.protocol_upload', id=protocol.id) }}" method="post" class="uk-form-horizontal" enctype="multipart/form-data">
+    {{ form.csrf_token() }}
+
+    <div class="uk-margin" uk-margin>
+        <label class="uk-form-label">{{ form.protocol_file.label }}</label>
+        <div uk-form-custom="target: true">
+            {{ form.protocol_file(class='uk-file uk-border-rounded') }}
+            <input class="uk-input uk-form-width-medium" type="text" placeholder="Протокол..." disabled>
+        </div>
+        {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+    </div>
+
+</form>
+{#
+{% else %}
+<a href="{{url_for('method.protocol_retrieve', id=protocol.id)}}" class="uk-button uk-button-default"><span uk-icon="download"></span> Скачать протокол</a>
+#}
+{% endif %}
+{% endblock %}

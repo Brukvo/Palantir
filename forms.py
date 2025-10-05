@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, SelectField, IntegerField, TextAreaField, BooleanField, SelectMultipleField, SubmitField
+from flask_wtf.file import FileAllowed
+from wtforms import StringField, DateField, SelectField, IntegerField, TextAreaField, BooleanField, SelectMultipleField, SubmitField, FileField
 from wtforms.validators import DataRequired, Optional
 from datetime import date
 
@@ -140,6 +141,22 @@ class MethodAssemblyForm(FlaskForm):
     title = StringField('Повестка', validators=[DataRequired()])
     description = TextAreaField('Детали', validators=[DataRequired()])
     submit = SubmitField('Сохранить')
+
+
+class MethodProtocolForm(FlaskForm):
+    # Основная информация о заседании
+    date = DateField('Дата заседания', validators=[DataRequired()], default=date.today)
+    # Содержание протокола
+    agenda = TextAreaField('Повестка', validators=[DataRequired()])  # Повестка дня
+    decisions = TextAreaField('Постановили', validators=[DataRequired()])  # Принятые решения
+    # Файл протокола
+    protocol_file = FileField('Файл протокола', validators=[Optional(), FileAllowed(['pdf', 'doc', 'docx'])])
+    submit = SubmitField('Сохранить')
+
+
+class MethodProtocolUploadForm(FlaskForm):
+    protocol_file = FileField('Файл протокола', validators=[DataRequired(), FileAllowed(['pdf', 'doc', 'docx'])])
+    submit = SubmitField('Загрузить')
 
 
 # сначала добавляется коллектив, только затем участники коллектива

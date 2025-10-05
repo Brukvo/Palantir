@@ -3,12 +3,14 @@ from docx.shared import Pt, Cm, Mm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_ORIENT
 from io import BytesIO
+from os.path import join, exists
+from os import remove
 from datetime import datetime
-from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem, School
+from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem, School, MethodAssemblyProtocol
 from extensions import db
 from sqlalchemy import desc, select
-from sqlalchemy.exc import NoResultFound
-from flask import redirect, flash, url_for
+from flask_wtf.file import FileStorage
+from flask import current_app
 
 from datetime import date
 
@@ -485,3 +487,14 @@ def fetch_all_deps_report(term):
     doc.save(file_stream)
     file_stream.seek(0)
     return file_stream
+
+def upload_file(filetype, data: FileStorage, filename, app_folder):
+    save_path = join(app_folder, filetype)
+    data.save(join(save_path, filename))
+    return filename
+
+def protocol_delete_file(protocol: MethodAssemblyProtocol):
+    if protocol.protocol_file:
+        file_path = join(current_app.config['UPLOAD_FOLDER'], 'method_protocols', protocol.protocol_file)
+        if exists(file_path):
+            remove(file_path)
