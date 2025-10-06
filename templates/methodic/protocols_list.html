@@ -7,7 +7,7 @@
     {{title}}
     <a href="{{ url_for('method.protocols_add') }}" class="uk-icon-button" uk-icon="plus"></a>
 </h2>
-<p>На этой странице &ndash; список протоколов заседаний методического объединения. Для упрощения процедуры скачайте предварительно заполненный протокол и затем загрузите его во время добавления протокола в систему:</p>
+{#<p>На этой странице &ndash; список протоколов заседаний методического объединения. Для упрощения процедуры скачайте предварительно заполненный протокол и затем загрузите его во время добавления протокола в систему:</p>
 <ul>
     <li>начало учебного года и I четверти</li>
     <li>конец I четверти</li>
@@ -17,7 +17,7 @@
     <li>конец III четверти</li>
     <li>середина IV четверти (открытие набора на новый учебный год)</li>
     <li>конец IV четверти, II полугодия, всего учебного года</li>
-</ul>
+</ul>#}
 <table class="uk-table uk-table-striped uk-table-hover">
     <tr>
         <th>Номер</th>
@@ -34,7 +34,7 @@
         <td>{% if a.protocol_file %}<a href="{{url_for('method.protocol_retrieve', id=a.id)}}">скачать</a>{% else %}отсутствует{% endif %}</td>
         <td>
             <a href="{{ url_for('method.protocol_view', id=a.id) }}" class="uk-icon-button uk-text-secondary" uk-icon="eye" uk-tooltip="title: Просмотреть протокол; pos: bottom"></a>
-            {% if not a.protocol_file %}<a href="#" class="uk-icon-button uk-text-primary" uk-icon="upload" uk-tooltip="title: Загрузить протокол; pos: bottom"></a>{% endif %}
+            {#{% if not a.protocol_file %}<a href="#" class="uk-icon-button uk-text-primary" uk-icon="upload" uk-tooltip="title: Загрузить протокол; pos: bottom"></a>{% endif %}#}
             <a href="#" class="uk-icon-button uk-text-danger" uk-icon="trash" uk-tooltip="title: Удалить протокол; pos: bottom"></a>
         </td>
     </tr>

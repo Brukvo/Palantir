@@ -498,3 +498,42 @@ def protocol_delete_file(protocol: MethodAssemblyProtocol):
         file_path = join(current_app.config['UPLOAD_FOLDER'], 'method_protocols', protocol.protocol_file)
         if exists(file_path):
             remove(file_path)
+
+def protocol_template(protocol: MethodAssemblyProtocol):
+    doc = set_font(Document(), 'PT Serif', 14)
+    section = doc.sections[0]
+    section.left_margin = Mm(12)
+    section.right_margin = Mm(12)
+    section.top_margin = Mm(12)
+    section.bottom_margin = Mm(12)
+
+    title = doc.add_paragraph()
+    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    title.add_run(f'Протокол методического заседания №{protocol.number} от {protocol.date.strftime("%d %B %Y г.")}').bold = True
+
+    attendees = doc.add_paragraph()
+    attendees.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    attendees.add_run(f'Присутствовали:\n').italic = True
+    for attendee in protocol.attendees.split('\n'):
+        attendees.add_run(f'{attendee}\n')
+
+    agenda_title = doc.add_paragraph()
+    agenda_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    agenda_title.add_run('Повестка:').italic = True
+
+    agenda = doc.add_paragraph()
+    for i, agenda_item in enumerate(protocol.agenda.split('\n'), start=1):
+        agenda.add_run(f'{i}. {agenda_item}')
+
+    decisions_title = doc.add_paragraph()
+    decisions_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    decisions_title.add_run('Постановили:').italic = True
+
+    decisions = doc.add_paragraph()
+    for i, dec_item in enumerate(protocol.decisions.split('\n'), start=1):
+        decisions.add_run(f'{i}. {dec_item}')
+
+    file_stream = BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    return file_stream

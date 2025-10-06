@@ -27,7 +27,7 @@
                                 <li><a style="color: #333 !important" href="{{ url_for('settings.subjects_list') }}">Предметы</a></li>
                                 {% if g.s %}<li><a style="color: #333 !important" href="{{ url_for('exams.all') }}">Протоколы промежуточной аттестации</a></li>{% endif %}
                                 <li><a style="color: #333 !important" href="{{ url_for('method.protocols_list') }}">Протоколы заседаний</a></li>
-                                <li><a style="color: #333 !important" href="{{ url_for('method.reports_list') }}">Отчёты методиста</a></li>
+                                {#<li><a style="color: #333 !important" href="{{ url_for('method.reports_list') }}">Отчёты методиста</a></li>#}
                                 {% if g.s %}<li><a style="color: #333 !important" href="{{ url_for('settings.attest_list') }}">Виды аттестации</a></li>{% endif %}
                             </ul>
                         </div>

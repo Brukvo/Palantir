@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session, send_file, request, current_app, send_from_directory
 from models import db, Teacher, MethodAssembly, School, MethodAssemblyProtocol
 from forms import MethodAssemblyForm, MethodProtocolForm, MethodProtocolUploadForm
-from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file
+from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file, protocol_template
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy import desc, select, func
 from os.path import join, exists
@@ -81,6 +81,8 @@ def protocol_retrieve(id):
 def protocol_file_delete(id):
     protocol = MethodAssemblyProtocol.query.get_or_404(id)
     protocol_delete_file(protocol)
+    protocol.protocol_file = None
+    db.session.commit()
     flash('Файл протокола удалён. Теперь можно загрузить новый файл', 'success')
     return redirect(url_for('method.protocol_view', id=protocol.id))
 
@@ -98,6 +100,17 @@ def protocol_delete(id):
         flash(f'Произошла ошибка: {e}')
         return redirect(url_for('method.protocol_view', id=protocol.id))
 
+@bp.get('/protocol/<int:id>/get_template')
+def protocol_get_template(id):
+    protocol = MethodAssemblyProtocol.query.get_or_404(id)
+    file_stream = protocol_template(protocol)
+    filename = f"Протокол_{protocol.number}_{protocol.date.strftime('%d-%m-%Y')}.docx"
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
 
 # Отчёты
 @bp.route('/reports')
