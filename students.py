@@ -188,7 +188,7 @@ def get_title_page(id):
 def get_all_title_pages():
     students = Student.query.all()
     file_stream = generate_all_title_pages(students)
-    filename = f'Личные_дела_титул_{get_academic_year()}'
+    filename = f'Личные_дела_титул_{get_academic_year()}.docx'
     return send_file(
         file_stream,
         as_attachment=True,

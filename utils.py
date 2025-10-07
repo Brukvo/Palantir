@@ -79,10 +79,16 @@ def generate_student_title_page(student: Student):
     section.top_margin = Cm(1)
     section.bottom_margin = Cm(1)
 
+    school: School = School.query.first()
+    school_title = doc.add_paragraph()
+    school_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    s_title = school_title.add_run(school.full_title)
+    s_title.font.size = Pt(14)
+
     # Заголовок
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    t = title.add_run('Личное дело обучающегося\n'.upper())
+    t = title.add_run('\nЛичное дело обучающегося'.upper())
     # t.bold = True
     t.font.size = Pt(24)
     
@@ -231,11 +237,18 @@ def generate_all_title_pages(students):
     section.top_margin = Cm(1)
     section.bottom_margin = Cm(1)
 
+    
     for student in students:
+        school: School = School.query.first()
+        school_title = doc.add_paragraph()
+        school_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        s_title = school_title.add_run(school.full_title)
+        s_title.font.size = Pt(14)
+
         # Заголовок
         title = doc.add_paragraph()
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        t = title.add_run('Личное дело обучающегося\n'.upper())
+        t = title.add_run('\nЛичное дело обучающегося'.upper())
         # t.bold = True
         t.font.size = Pt(24)
         
@@ -248,7 +261,7 @@ def generate_all_title_pages(students):
         bd.add_run("Дата рождения: ").bold = True
         bd.add_run(student.birth_date.strftime('%d %B %Y'))
 
-            # Информация о родителях
+        # Информация о родителях
         parents = doc.add_paragraph()
         parents.alignment = WD_ALIGN_PARAGRAPH.CENTER
         parents.add_run('\nСведения о родителях/законных представителях').italic = True
