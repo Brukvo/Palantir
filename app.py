@@ -18,9 +18,12 @@ from method import bp as method
 from models import Teacher, Student, Department, Concert, Contest, MethodAssembly, StudentStatus, Region
 from forms import MethodAssemblyForm
 from utils import get_term, get_academic_year
+from migrations import apply_migrations
 
 locale.setlocale(locale.LC_TIME, 'ru_RU.utf-8')
 app = Flask(__name__)
+
+CURRENT_DB_VERSION = 1
 
 # Конфигурация
 app.config['SECRET_KEY'] = 'o!P0vOp*diJHlHKiE@W#(Sp_Cu6RzZ'
@@ -40,6 +43,63 @@ app.register_blueprint(teachers)
 app.register_blueprint(events)
 app.register_blueprint(departments)
 app.register_blueprint(method)
+
+def init_db_version_table():
+    """Создает таблицу для хранения версии БД"""
+    with app.app_context():
+        try:
+            # Создаем таблицу для версий, если её нет
+            db.session.execute(text('''
+                CREATE TABLE IF NOT EXISTS db_version (
+                    id INTEGER PRIMARY KEY,
+                    version INTEGER NOT NULL,
+                    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            '''))
+            
+            # Проверяем текущую версию
+            result = db.session.execute(text('SELECT version FROM db_version ORDER BY id DESC LIMIT 1'))
+            current_version = result.scalar()
+            
+            if current_version is None:
+                # Первая инициализация
+                db.session.execute(text('INSERT INTO db_version (version) VALUES (:version)'), 
+                                 {'version': CURRENT_DB_VERSION})
+                current_version = CURRENT_DB_VERSION
+            
+            db.session.commit()
+            return current_version
+        except Exception as e:
+            db.session.rollback()
+            return 0
+
+def get_db_schema_version():
+    """Получает текущую версию схемы БД"""
+    try:
+        with app.app_context():
+            result = db.session.execute(text('SELECT version FROM db_version ORDER BY id DESC LIMIT 1'))
+            return result.scalar() or 1
+    except:
+        return 1
+    
+def check_and_migrate_database():
+    """Проверяет и применяет миграции при запуске"""
+    current_version = get_db_schema_version()
+    
+    if current_version < CURRENT_DB_VERSION:
+        print(f"! Доступно обновление БД: {current_version} -> {CURRENT_DB_VERSION}")
+        try:
+            applied = apply_migrations(current_version, CURRENT_DB_VERSION)
+            if applied:
+                print(f"Применены обновления БД: {applied}")
+                flash(f'База данных обновлена с версии {current_version} до {CURRENT_DB_VERSION}', 'success')
+            else:
+                print("Обновление не требуется, либо процесс завершился ошибкой")
+        except Exception as e:
+            print(f"Обновление завершилось ошибкой: {e}")
+            # Здесь можно показать сообщение пользователю
+    else:
+        print(f"Database is up to date (version {current_version})")
 
 @app.route('/favicon.ico')
 def retrieve_favicon():
@@ -79,6 +139,8 @@ def get_credentials():
             db.session.execute(text(regions_list))
         db.session.commit()
         flash('База данных создана', 'success')
+    # finally:
+    #     check_and_migrate_database()
 
 # Главная страница
 @app.route('/')
