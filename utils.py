@@ -445,7 +445,7 @@ def generate_dep_report(dep_id, term, with_title=True):
 
 def fetch_all_deps_report(term):
     # собираем данные о школе
-    school = School.query.one_or_none()
+    school = School.query.first()
     # собрать все отделения
     reports = {dep_id: [] for dep_id in db.session.execute(select(Department.id)).scalars().all()}
     # собрать все отчёты по отделению
@@ -467,13 +467,14 @@ def fetch_all_deps_report(term):
         period = f'{term} четверть {get_academic_year()} учебного года'
     else:
         period = f'{get_academic_year()} учебный год'
-    title.add_run(f'Отчёт зав. метод. объединения [Фамилия И. О.] об успеваемости в {school.short_title} за {period}').bold = True
+    title.add_run(f'Отчёт зав. метод. объединения ({school.methodist.short_name}) об успеваемости в {school.short_title} за {period}').bold = True
     # добавляем отчёт по отделению, а следом за ним
     for dep in reports:
         dep_report = reports[dep][0]
         exams = reports[dep][1:]
         dep_block_title = doc.add_paragraph()
-        dep_block_title.add_run(f'Отчёт об успеваемости на отделении "{dep_report.department.title}"').bold = True
+        dep_block_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        dep_block_title.add_run(f'{dep_report.department.title[0].upper()}{dep_report.department.title[1:]}').bold = True
         dep_block = doc.add_paragraph(f'Всего на отделении обучающихся: {dep_report.total}, из них:')
         if dep_report.got_best:
             dep_block.add_run(f'\n\t– отлично: {dep_report.got_best}')
