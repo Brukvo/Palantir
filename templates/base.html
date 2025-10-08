@@ -15,7 +15,9 @@
         <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
             <div class="uk-navbar-center">
                 <ul class="uk-navbar-nav">
-                    <li><a href="/"><span class="uk-icon uk-icon-image" style="background-image: url({{url_for('static', filename='images/favicon.png')}})"></span></a></li>
+                    <li><a href="/"><span class="uk-icon uk-icon-image"
+                                style="background-image: url({{url_for('static', filename='images/favicon.png')}})"></span></a>
+                    </li>
                     {% if g.t %}<li><a href="{{ url_for('students.all') }}">Ученики</a></li>{% endif %}
                     {% if g.d %}<li><a href="{{ url_for('teachers.all') }}">Преподаватели</a></li>{% endif %}
                     <li><a href="{{ url_for('departments.all')}}">Отделения</a></li>
@@ -24,11 +26,17 @@
                     <li><a href="#">Управление</a>
                         <div uk-dropdown>
                             <ul class="uk-nav uk-dropdown-nav">
-                                <li><a style="color: #333 !important" href="{{ url_for('settings.subjects_list') }}">Предметы</a></li>
-                                {% if g.s %}<li><a style="color: #333 !important" href="{{ url_for('exams.all') }}">Протоколы промежуточной аттестации</a></li>{% endif %}
-                                <li><a style="color: #333 !important" href="{{ url_for('method.protocols_list') }}">Протоколы заседаний</a></li>
-                                {#<li><a style="color: #333 !important" href="{{ url_for('method.reports_list') }}">Отчёты методиста</a></li>#}
-                                {% if g.s %}<li><a style="color: #333 !important" href="{{ url_for('settings.attest_list') }}">Виды аттестации</a></li>{% endif %}
+                                <li><a style="color: #333 !important"
+                                        href="{{ url_for('settings.subjects_list') }}">Предметы</a></li>
+                                {% if g.s %}<li><a style="color: #333 !important"
+                                        href="{{ url_for('exams.all') }}">Протоколы промежуточной аттестации</a></li>{%
+                                endif %}
+                                <li><a style="color: #333 !important"
+                                        href="{{ url_for('method.protocols_list') }}">Протоколы заседаний</a></li>
+                                {#<li><a style="color: #333 !important"
+                                        href="{{ url_for('method.reports_list') }}">Отчёты методиста</a></li>#}
+                                {% if g.s %}<li><a style="color: #333 !important"
+                                        href="{{ url_for('settings.attest_list') }}">Виды аттестации</a></li>{% endif %}
                             </ul>
                         </div>
                     </li>
@@ -39,9 +47,14 @@
     </header>
     <main class="uk-section uk-section-medium">
         <div class="uk-container">
-        {% block content %}
+            {% block content %}
             Кажется, кто-то забыл про блок <code>content</code> в шаблоне 🤔
-        {% endblock %}
+            {% endblock %}
+        </div>
+        <div class="shutdown-section" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+            <button onclick="shutdownApplication()" class="uk-button uk-button-danger uk-button-small">
+                <span uk-icon="icon: close"></span> Завершить работу
+            </button>
         </div>
     </main>
     <!-- Подвал -->
@@ -51,6 +64,52 @@
         </div>
     </footer>
     {% block footer_scripts %}
+    <script>
+        function shutdownApplication() {
+            if (confirm('Вы уверены, что хотите завершить работу приложения?')) {
+                // Показываем уведомление о начале остановки
+                UIkit.notification({
+                    message: 'Останавливаем сервер...',
+                    status: 'primary',
+                    timeout: 2000
+                });
+
+                // Отправляем запрос на остановку сервера
+                fetch('/shutdown', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        }
+                        throw new Error('Network response was not ok');
+                    })
+                    .then(data => {
+                        // Сервер остановлен, показываем финальное сообщение
+                        UIkit.notification({
+                            message: 'Сервер остановлен. Это окно можно закрыть.',
+                            status: 'success',
+                            timeout: 5000
+                        });
+
+                        // Пробуем автоматически закрыть окно через 3 секунды
+                        setTimeout(() => {
+                            try {
+                                window.close();
+                            } catch (e) {
+                                console.log('Автоматическое закрытие не удалось, закройте окно вручную');
+                            }
+                        }, 3000);
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        UIkit.notification({
+                            message: 'Сервер остановлен, это окно/вкладку можно закрыть',
+                            status: 'success',
+                            timeout: 30000
+                        });
+                    });
+            }
+        }
+    </script>
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     <script>

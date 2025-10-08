@@ -37,7 +37,7 @@ def protocols_add():
                 secretary_id=school.methodist_id,
                 agenda=form.agenda.data,
                 decisions=form.decisions.data,
-                protocol_file=upload_file('method_protocols', form.protocol_file.data, f'Протокол_{protocol_num}_{form.date.data.strftime("%d-%m-%Y")}.{request.files["protocol_file"].filename.split(".")[-1]}', current_app.config["UPLOAD_FOLDER"]) if form.protocol_file.data else None
+                protocol_file=upload_file('method_protocols', form.protocol_file.data, f'Протокол_{protocol_num}_{form.date.data.strftime("%d-%m-%Y")}.{request.files["protocol_file"].filename.split(".")[-1]}', current_app.config['DOCS_FOLDER']) if form.protocol_file.data else None
             )
             db.session.add(protocol)
             db.session.commit()
@@ -63,7 +63,7 @@ def protocol_upload(id):
     protocol = MethodAssemblyProtocol.query.get_or_404(id)
     form = MethodProtocolUploadForm()
     if form.validate_on_submit():
-        filename = upload_file('method_protocols', form.protocol_file.data, f'Протокол_{protocol.number}_{protocol.date.strftime("%d-%m-%Y")}.{request.files["protocol_file"].filename.split(".")[-1]}', current_app.config["UPLOAD_FOLDER"])
+        filename = upload_file('method_protocols', form.protocol_file.data, f'Протокол_{protocol.number}_{protocol.date.strftime("%d-%m-%Y")}.{request.files["protocol_file"].filename.split(".")[-1]}', current_app.config['DOCS_FOLDER'])
         protocol.protocol_file = filename
         db.session.commit()
         flash('Файл протокола успешно загружен', 'success')
@@ -75,7 +75,7 @@ def protocol_upload(id):
 @bp.get('/protocol/<int:id>/download')
 def protocol_retrieve(id):
     protocol = MethodAssemblyProtocol.query.get_or_404(id)
-    return send_from_directory(current_app.config["UPLOAD_FOLDER"], join('method_protocols', protocol.protocol_file), as_attachment=True)
+    return send_from_directory(current_app.config['DOCS_FOLDER'], join('method_protocols', protocol.protocol_file), as_attachment=True)
 
 @bp.get('/protocol/<int:id>/delete_file')
 def protocol_file_delete(id):

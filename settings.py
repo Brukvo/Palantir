@@ -3,6 +3,7 @@ from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, C
 from forms import ExamTypeForm, SubjectAddForm, SubjectEditForm, SchoolForm
 from sqlalchemy import desc, text
 from sqlalchemy.exc import IntegrityError, MultipleResultsFound
+from utils import get_db_version
 
 bp = Blueprint('settings', __name__, url_prefix='/settings')
 
@@ -12,7 +13,9 @@ def all():
         school = School.query.one_or_none()
     except MultipleResultsFound:
         school = School.query.all()[-1]
-    return render_template('settings/index.html', title='Настройки', school=school)
+
+    db_version = get_db_version()
+    return render_template('settings/index.html', title='Настройки', school=school, db_version=db_version)
 
 @bp.route('/school_info', methods=['GET', 'POST'])
 def school_info():

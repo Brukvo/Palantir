@@ -1,30 +1,44 @@
 from extensions import db
 from sqlalchemy import text
 
-# функционал миграций:
-# ключ - номер *следующей* версии БД (число)
-# значение - список из SQL-инструкций (по одной за раз) для миграции, которые можно получить, запустив flask db migrate --sql, а затем уже непосредственно flask db migrate -m '...'
-
-MIGRATIONS = {}
+MIGRATIONS = {
+    # Версия 1: базовая схема (уже создана через create_all())
+    # Поэтому пустая - только для отметки версии
+    1: [],
+    
+    # Пример будущей миграции
+    # 2: [
+        # "ALTER TABLE students ADD COLUMN notes TEXT",
+        # "CREATE TABLE new_feature (...)",
+    # ],
+}
 
 def apply_migrations(current_version, target_version):
-    """Применяет миграции от текущей версии до целевой"""
-    applied_migrations = []
+    """Применяет миграции последовательно"""
+    applied_versions = []
     
     for version in range(current_version + 1, target_version + 1):
         if version in MIGRATIONS:
-            print(f"Applying migration to version {version}")
+            print(f"Применяем миграцию к версии {version}")
+            
             try:
-                with db.engine.connect() as conn:
-                    for migration_sql in MIGRATIONS[version]:
-                        conn.execute(text(migration_sql))
-                    # Обновляем версию
-                    conn.execute(text('INSERT INTO db_version (version) VALUES (:version)'), 
-                               {'version': version})
-                    conn.commit()
-                applied_migrations.append(version)
+                # Применяем SQL запросы для этой версии
+                for sql in MIGRATIONS[version]:
+                    if sql.strip():  # Пропускаем пустые строки
+                        db.session.execute(text(sql))
+                
+                # Обновляем версию
+                db.session.execute(
+                    text('INSERT INTO db_version (version) VALUES (:version)'),
+                    {'version': version}
+                )
+                
+                db.session.commit()
+                applied_versions.append(version)
+                
             except Exception as e:
-                print(f"Error applying migration {version}: {e}")
+                db.session.rollback()
+                print(f"Ошибка применения миграции {version}: {e}")
                 raise
     
-    return applied_migrations
+    return applied_versions

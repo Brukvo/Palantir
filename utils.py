@@ -8,11 +8,24 @@ from os import remove
 from datetime import datetime
 from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem, School, MethodAssemblyProtocol
 from extensions import db
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, text
 from flask_wtf.file import FileStorage
 from flask import current_app
 
 from datetime import date
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+def get_db_version():
+    """Получает текущую версию схемы БД"""
+    try:
+        result = db.session.execute(text('SELECT version FROM db_version ORDER BY id DESC LIMIT 1'))
+        return result.scalar() or 0
+    except Exception as e:
+        logger.error(f"Error getting schema version: {e}")
+        return 0
 
 def get_academic_year(dt=None):
     """Возвращает учебный год в формате '2024-2025' для указанной даты"""
@@ -503,13 +516,15 @@ def fetch_all_deps_report(term):
     return file_stream
 
 def upload_file(filetype, data: FileStorage, filename, app_folder):
-    save_path = join(app_folder, filetype)
-    data.save(join(save_path, filename))
+    save_path = os.path.join(app_folder, filetype)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    data.save(os.path.join(save_path, filename))
     return filename
 
 def protocol_delete_file(protocol: MethodAssemblyProtocol):
     if protocol.protocol_file:
-        file_path = join(current_app.config['UPLOAD_FOLDER'], 'method_protocols', protocol.protocol_file)
+        file_path = join(current_app.config['DOCS_FOLDER'], 'method_protocols', protocol.protocol_file)
         if exists(file_path):
             remove(file_path)
 
