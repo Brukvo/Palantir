@@ -169,15 +169,13 @@ def generate_student_title_page(student: Student):
     return file_stream
 
 def generate_protocol(exam: Exam, exam_items, props):
-    doc = Document()
+    doc = set_font(Document(), "PT Astra Serif", 14)
 
     section = doc.sections[0]
     section.left_margin = Cm(1)
     section.right_margin = Cm(1)
     section.top_margin = Cm(1)
     section.bottom_margin = Cm(1)
-
-    doc = set_font(doc, "PT Astra Serif", 14)
 
     exam_type = exam.exam_type.name
     current_date = exam.date.strftime('%d.%m.%Y')
@@ -538,7 +536,7 @@ def protocol_template(protocol: MethodAssemblyProtocol):
 
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title.add_run(f'Протокол методического заседания №{protocol.number} от {protocol.date.strftime("%d %B %Y г.")}').bold = True
+    title.add_run(f'Протокол методического заседания №{protocol.number} от {protocol.date.strftime("%d.%m.%Y г.")}').bold = True
 
     attendees = doc.add_paragraph()
     attendees.alignment = WD_ALIGN_PARAGRAPH.RIGHT

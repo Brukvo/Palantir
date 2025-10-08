@@ -251,6 +251,10 @@ def shutdown():
 def error404(error):
     return render_template('error.html', e_msg=error, title='Страница не найдена'), 404
 
+@app.errorhandler(500)
+def error404(error):
+    return render_template('error.html', e_msg=error, title='Ошибка сервера'), 500
+
 @app.errorhandler(403)
 def access_forbidden(error):
     err_text = str(error).split(':')[0]

@@ -216,7 +216,7 @@ def exam_detail(id):
 @bp.route('/<int:id>/get_protocol')
 def protocol(id):
     exam = Exam.query.get_or_404(id)
-    exam_items = ExamItem.query.filter_by(event_id=exam.id)
+    exam_items = ExamItem.query.filter_by(event_id=exam.id).all()
 
     props = {
         'total': len(exam_items),
