@@ -53,14 +53,6 @@ def all():
         5: False
         }
 
-#    for i in range(5):    
-#        for t in range(5):
-#            res = 0
-#            for d in reports_list:
-#                if reports_list[d][t]:
-#                    res += 1
-#        if res == Department.query.count():
-#            report_avail[i+1] = True
     for i in range(5):
         res = 0
         for dep in Department.query.all():

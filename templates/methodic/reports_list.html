@@ -6,16 +6,32 @@
 <h2>Отчёты заведующего методическим объединением</h2>
 <table class="uk-table uk-table-striped">
     <tr>
-        <th>Период</th>
-        <th>Дата</th>
-        <th>Название</th>
-        <th>Действия</th>
+        <th colspan="2">Период</th>
+        <th colspan="6">Информация</th>
+        <th colspan="2">Действия</th>
     </tr>
     <tr>
-        <td>1</td>
-        <td>2</td>
-        <td>3</td>
-        <td>4</td>
+        <th></th>
+        <th class="uk-table-shrink uk-text-center"><span uk-tooltip="title: Классное руководство; pos: top">КР</span></th>
+        <th class="uk-table-shrink uk-text-center"><span uk-tooltip="title: Доклады; pos: top">Д</span></th>
+        <th class="uk-table-shrink uk-text-center"><span uk-tooltip="title: Открытые уроки; pos: top">ОУ</span></th>
+        <th class="uk-table-shrink uk-text-center"><span uk-tooltip="title: Курсы повышения квалификации и профессиональной переподготовки; pos: top">К</span></th>
+        <th class="uk-table-shrink uk-text-center"><span uk-tooltip="title: Концерты; pos: top">КЦ</span></th>
+        <th class="uk-table-shrink uk-text-center"><span uk-tooltip="title: Конкурсы; pos: top">КК</span></th>
+        <th></th>
     </tr>
+    
+    {% for term in [1, 2, 3, 4, 5] %}
+    <tr>
+        <td>{% if term in [1, 2, 3, 4] %}{{term}} четверть{% else %}Год{% endif %}</td>
+        <td>#</td>
+        <td>#</td>
+        <td>#</td>
+        <td>#</td>
+        <td>#</td>
+        <td>#</td>
+        <td></td>
+    </tr>
+    {% endfor %}
 </table>
 {% endblock %}
