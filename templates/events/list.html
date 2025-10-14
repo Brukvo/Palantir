@@ -39,7 +39,7 @@
         <td>{{ concert.place }}</td>
         <td><a href="{{ url_for('teachers.view', id=concert.teacher_id) }}">{{ concert.teacher.short_name }}</a></td>
         <td class="uk-text-center">{{ concert.participations|count }}</td>
-        <td><a href="{{ url_for('events.concert_part_add', concert_id=concert.id) }}" class="uk-icon-button" uk-icon="user" uk-tooltip="title: Добавить участника; pos: bottom"></a>
+        <td><a href="{{ url_for('events.concert_part_add', c_id=concert.id) }}" class="uk-icon-button" uk-icon="user" uk-tooltip="title: Добавить участника; pos: bottom"></a>
         <a href="{{ url_for('events.concert_edit', id=concert.id) }}" class="uk-icon-button" uk-icon="pencil" uk-tooltip="title: Изменить концерт; pos: bottom"></a>
         {% if not concert.has_passed %}<a href="{{ url_for('events.concert_complete', id=concert.id) }}" class="uk-icon-button uk-text-success" uk-icon="check" uk-tooltip="title: Завершить концерт; pos: bottom"></a>{% else %}<span class="uk-icon-button uk-disabled" uk-icon="ban"></span>{% endif %}
         <a href="{{ url_for('events.concert_delete', c_id=concert.id) }}" class="uk-icon-button uk-text-danger" uk-tooltip="title: Удалить концерт; pos: bottom" uk-icon="trash"></a></td>
