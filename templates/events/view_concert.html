@@ -38,7 +38,7 @@
             {% if p.student_id %}
             <a href="{{ url_for('teachers.view', id=p.student.lead_teacher_id) }}">{{ p.student.lead_teacher.short_name }}</a>
             {% else %}
-            <a href="{{ url_for('teachers.view', id=p.ensemble.teacher.short_name) }}">{{ p.ensemble.teacher.short_name }}</a>
+            <a href="{{ url_for('teachers.view', id=p.ensemble.teacher_id) }}">{{ p.ensemble.teacher.short_name }}</a>
             {% endif %}
         </td>
         <td>
