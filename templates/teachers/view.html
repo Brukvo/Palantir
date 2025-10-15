@@ -132,15 +132,13 @@
                 <tr>
                     <th>Тип</th>
                     <th>Название</th>
-                    <th>Часов</th>
                     <th>Срок прохождения</th>
                     <th>Место прохождения</th>
                 </tr>
                 {% for course in teacher.courses %}
                 <tr>
                     <td>{% if course.course_type == 1 %}<span uk-tooltip="title: Курсы повышения квалификации">КПК</span>{% else %}<span uk-tooltip="title: Курсы профессиональной переподготовки">КПП</span>{% endif %}</td>
-                    <td>{{ course.title }}</td>
-                    <td>{{ course.hours }}</td>
+                    <td>{{ course.title }} ({{ course.hours }} ч)<br><i>&emsp;{% if course.course_type == 1 %}Свидетельство:{% else %}Диплом:{% endif %} {{ course.cert_no }}</i></td>
                     <td>{{ course.start_date.strftime('%d.%m.%Y') }}&ndash;{{ course.end_date.strftime('%d.%m.%Y') }}</td>
                     <td>{% if course.place %}{{ course.place }}{% else %}&mdash;{% endif %}</td>
                 </tr>

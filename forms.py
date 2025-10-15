@@ -95,6 +95,7 @@ class TeacherCourseForm(FlaskForm):
     start_date = DateField('Начало обучения', validators=[DataRequired()])
     end_date = DateField('Окончание обучения', validators=[DataRequired()])
     place = StringField('Место проведения', description='Для онлайн-формата можно не указывать', validators=[Optional()])
+    cert_no = StringField('Документ об окончании', description='Укажите полностью серию и номер', validators=[DataRequired()])
     submit = SubmitField('Сохранить')
 
 class ReportForm(FlaskForm):

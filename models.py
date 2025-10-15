@@ -338,6 +338,7 @@ class CourseItem(db.Model):
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     place = db.Column(db.String(255))
+    cert_no = db.Column(db.String(32), nullable=False)
 
     teacher = db.relationship('Teacher', backref='courses')
 

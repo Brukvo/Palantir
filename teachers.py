@@ -275,7 +275,8 @@ def add_course(id):
                 hours=form.hours.data,
                 start_date=form.start_date.data,
                 end_date=form.end_date.data,
-                place=form.place.data
+                place=form.place.data,
+                cert_no=form.cert_no.data
             )
             db.session.add(course)
             db.session.commit()
