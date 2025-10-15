@@ -5,6 +5,9 @@ MIGRATIONS = {
     # Версия 1: базовая схема (уже создана через create_all())
     # Поэтому пустая - только для отметки версии
     1: [],
+    2: [
+        "CREATE TABLE teacher_courses (id INTEGER NOT NULL, teacher_id INTEGER NOT NULL, course_type INTEGER NOT NULL, title VARCHAR(120) NOT NULL, hours INTEGER NOT NULL, start_date DATE NOT NULL, end_date DATE NOT NULL, place VARCHAR(255), PRIMARY KEY (id), FOREIGN KEY(teacher_id) REFERENCES teachers (id), CONSTRAINT uq_teacher_courses UNIQUE (course_type, teacher_id, title));"
+    ]
     
     # Пример будущей миграции
     # 2: [

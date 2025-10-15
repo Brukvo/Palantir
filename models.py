@@ -299,7 +299,8 @@ class MethodAssembly(db.Model):
 
 class MethodAssemblyProtocol(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    
+    # title = db.Column(db.String(255), nullable=False)
+
     # Базовые поля для идентификации периода
     term = db.Column(db.Integer, nullable=False)
     academic_year = db.Column(db.String(10), nullable=False)
@@ -324,6 +325,24 @@ class MethodAssemblyProtocol(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint('academic_year', 'number', name='uq_method_protocol_number'),
+    )
+
+class CourseItem(db.Model):
+    __tablename__ = 'teacher_courses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
+    course_type = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(120), nullable=False)
+    hours = db.Column(db.Integer, nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    place = db.Column(db.String(255))
+
+    teacher = db.relationship('Teacher', backref='courses')
+
+    __table_args__ = (
+        db.UniqueConstraint('course_type', 'teacher_id', 'title', name='uq_teacher_courses'),
     )
 
 

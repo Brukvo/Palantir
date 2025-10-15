@@ -1,3 +1,6 @@
+Эти шаблоны предназначены для ускорения создания HTML-страниц. Можно использовать и сниппеты, но... лень :) и некогда.
+
+Шаблон унаследованной страницы:
 {% extends 'base.html' %}
 
 {% block title %}{{title}} / {{super()}}{% endblock %}
@@ -19,7 +22,7 @@
     <label class="uk-form-label">{{ form..label }}</label>
     <div class="uk-form-controls">
         {{ form.(class='uk-input uk-border-rounded') }}
-        <span class="uk-text-small uk-text-muted"></span>
+        {% if form..description %}<span class="uk-text-small uk-text-muted">{{ form..description }}</span>{% endif %}
     </div>
 </div>
 

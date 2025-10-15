@@ -59,7 +59,7 @@ server_thread = None
 # Глобальная переменная для graceful shutdown
 shutdown_flag = False
 
-CURRENT_DB_VERSION = 1  # Текущая версия схемы
+CURRENT_DB_VERSION = 2  # Текущая версия схемы
 
 def setup_database():
     """Инициализация БД и системы версионирования"""
@@ -107,7 +107,6 @@ def check_and_migrate_database():
             
             if applied:
                 print(f"✅ Миграции применены: {applied}")
-                flash(f'База данных обновлена до версии {CURRENT_DB_VERSION}', 'success')
             else:
                 print("❌ Не удалось применить миграции")
                 
@@ -116,7 +115,6 @@ def check_and_migrate_database():
             
     except Exception as e:
         print(f"❌ Ошибка миграции: {e}")
-        flash('Ошибка при обновлении базы данных', 'danger')
 
 def create_backup():
     """Создает резервную копию БД перед миграцией"""
@@ -197,7 +195,7 @@ def get_credentials():
             db.session.execute(text(regions_list))
         db.session.commit()
     except OperationalError:
-        migrate.db.create_all()
+        db.create_all()
         statuses = StudentStatus.query.count()
         if not statuses:
             for status in ["учится", "выпущен(а)", "в академическом отпуске", "отчислен(а)"]:

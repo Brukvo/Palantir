@@ -88,6 +88,14 @@ class TeacherForm(FlaskForm):
     is_combining = BooleanField('совместитель', validators=[Optional()])
     submit = SubmitField('Сохранить')
 
+class TeacherCourseForm(FlaskForm):
+    course_type = SelectField('Тип курса', coerce=int, choices=[(1, 'курсы повышения квалификации'), (2, 'курсы профессиональной переподготовки')], validators=[DataRequired()])
+    title = StringField('Название курса', validators=[DataRequired()])
+    hours = IntegerField('Часов', validators=[DataRequired()])
+    start_date = DateField('Начало обучения', validators=[DataRequired()])
+    end_date = DateField('Окончание обучения', validators=[DataRequired()])
+    place = StringField('Место проведения', description='Для онлайн-формата можно не указывать', validators=[Optional()])
+    submit = SubmitField('Сохранить')
 
 class ReportForm(FlaskForm):
     subject_id = SelectField('Предмет', coerce=int, validators=[DataRequired()])

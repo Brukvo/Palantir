@@ -21,6 +21,8 @@
                 <li class="uk-nav-divider"></li>
                 <li><a href="{{ url_for('teachers.send_lecture', id=teacher.id) }}">Доклад</a></li>
                 <li><a href="{{ url_for('teachers.send_open_lesson', id=teacher.id) }}">Открытый урок</a></li>
+                <li class="uk-nav-divider"></li>
+                <li><a href="{{ url_for('teachers.add_course', id=teacher.id) }}">Курсы</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -122,7 +124,31 @@
     </li>
     {% endif %}
 
-
+    {% if teacher.courses %}
+    <li>
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Пройденные курсы</a>
+        <div class="uk-accordion-content">
+            <table class="uk-table uk-table-small uk-table-striped">
+                <tr>
+                    <th>Тип</th>
+                    <th>Название</th>
+                    <th>Часов</th>
+                    <th>Срок прохождения</th>
+                    <th>Место прохождения</th>
+                </tr>
+                {% for course in teacher.courses %}
+                <tr>
+                    <td>{% if course.course_type == 1 %}<span uk-tooltip="title: Курсы повышения квалификации">КПК</span>{% else %}<span uk-tooltip="title: Курсы профессиональной переподготовки">КПП</span>{% endif %}</td>
+                    <td>{{ course.title }}</td>
+                    <td>{{ course.hours }}</td>
+                    <td>{{ course.start_date.strftime('%d.%m.%Y') }}&ndash;{{ course.end_date.strftime('%d.%m.%Y') }}</td>
+                    <td>{% if course.place %}{{ course.place }}{% else %}&mdash;{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </li>
+    {% endif %}
 
 
     {% if teacher.lecture_items %}

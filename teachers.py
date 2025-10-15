@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session, send_file
-from models import db, Exam, Student, ExamType, Department, ExamItem, Teacher, Subject, ReportItem, ClassReportItem, LectureItem, OpenLessonItem, ConcertParticipation, ContestParticipation
-from forms import TeacherForm, ReportForm, LectureForm, OpenLessonForm, ClassReportForm
+from models import db, Exam, Student, ExamType, Department, ExamItem, Teacher, Subject, ReportItem, ClassReportItem, LectureItem, OpenLessonItem, ConcertParticipation, ContestParticipation, CourseItem
+from forms import TeacherForm, ReportForm, LectureForm, OpenLessonForm, ClassReportForm, TeacherCourseForm
 from utils import get_academic_year, get_term
 from sqlalchemy.exc import IntegrityError
 
@@ -260,3 +260,31 @@ def send_open_lesson(id):
 
     return render_template('teachers/add_open_lesson.html', form=form, title='Добавление открытого урока', teacher=teacher)
 
+@bp.route('/<int:id>/course', methods=['GET', 'POST'])
+def add_course(id):
+    form = TeacherCourseForm()
+    teacher = Teacher.query.get_or_404(id)
+    teachers = Teacher.query.all()
+
+    if form.validate_on_submit():
+        try:
+            course = CourseItem(
+                teacher_id=teacher.id,
+                course_type=form.course_type.data,
+                title=form.title.data,
+                hours=form.hours.data,
+                start_date=form.start_date.data,
+                end_date=form.end_date.data,
+                place=form.place.data
+            )
+            db.session.add(course)
+            db.session.commit()
+            course_type = 'повышения квалификации' if form.course_type.data == 1 else 'профессиональной подготовки'
+            flash(f'Курс {course_type} <b>{form.title.data}</b> в объёме {form.hours.data}ч успешно добавлен', 'success')
+            return redirect(url_for('teachers.view', id=teacher.id))
+        except IntegrityError:
+            db.rollback()
+            flash('Такой курс уже пройден преподавателем', 'warning')
+            return redirect(url_for('teachers.view', id=teacher.id))
+    
+    return render_template('teachers/add_course.html', title='Добавление курса', form=form, teacher=teacher)

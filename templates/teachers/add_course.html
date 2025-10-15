@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title}}&ensp;<span class="uk-text-muted">{{ teacher.short_name }}</span></h2>
+<form action="{{ url_for('teachers.add_course', id=teacher.id) }}" method="post" class="uk-form-stacked">
+    {{ form.csrf_token() }}
+
+    <div uk-grid>
+        <div class="uk-width-1-2">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.title.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.title(class='uk-input uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted">{% if form.title.description %}{{ form.title.description
+                        }}{% endif %}</span>
+                </div>
+            </div>
+        </div>
+        <div class="uk-width-1-3">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.course_type.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.course_type(class='uk-select uk-border-rounded') }}
+                    {% if form.course_type.description %}<span class="uk-text-small uk-text-muted">{{
+                        form.course_type.description }}</span>{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="uk-width-1-6">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.hours.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.hours(class='uk-input uk-border-rounded') }}
+                    {% if form.hours.description %}<span class="uk-text-small uk-text-muted">{{ form.hours.description
+                        }}</span>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div uk-grid>
+        <div class="uk-width-1-2">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.place.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.place(class='uk-input uk-border-rounded') }}
+                    <span class="uk-text-small uk-text-muted">{% if form.place.description %}{{ form.place.description
+                        }}{% endif %}</span>
+                </div>
+            </div>
+        </div>
+        <div class="uk-width-1-4">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.start_date.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.start_date(class='uk-input uk-border-rounded') }}
+                    {% if form.start_date.description %}<span class="uk-text-small uk-text-muted">{{
+                        form.start_date.description }}</span>{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="uk-width-1-4">
+            <div class="uk-margin">
+                <label class="uk-form-label">{{ form.end_date.label }}</label>
+                <div class="uk-form-controls">
+                    {{ form.end_date(class='uk-input uk-border-rounded') }}
+                    {% if form.end_date.description %}<span class="uk-text-small uk-text-muted">{{
+                        form.end_date.description }}</span>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin">
+        {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
+    </div>
+</form>
+{% endblock %}
