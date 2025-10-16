@@ -467,10 +467,10 @@ def fetch_all_deps_report(term, is_method=False):
     # создаём и настраиваем документ
     doc = set_font(Document(), 'PT Serif', 14)
     section = doc.sections[0]
-    section.left_margin = Mm(12)
-    section.right_margin = Mm(12)
-    section.top_margin = Mm(12)
-    section.bottom_margin = Mm(12)
+    section.left_margin = Mm(20)
+    section.right_margin = Mm(10)
+    section.top_margin = Mm(10)
+    section.bottom_margin = Mm(10)
 
     # добавляем заголовок
     title = doc.add_paragraph()
