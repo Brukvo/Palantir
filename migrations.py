@@ -10,6 +10,11 @@ MIGRATIONS = {
     ],
     3: [
         "ALTER TABLE teacher_courses ADD COLUMN cert_no VARCHAR(32) NOT NULL;"
+    ],
+    4: [
+        "ALTER TABLE method_assembly_protocol ADD COLUMN title VARCHAR(128) NOT NULL;",
+        "ALTER TABLE teacher_courses ADD COLUMN academic_year VARCHAR(9) NOT NULL;",
+        "ALTER TABLE teacher_courses ADD COLUMN term INTEGER NOT NULL;"
     ]
     
     # Пример будущей миграции

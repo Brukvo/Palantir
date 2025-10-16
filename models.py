@@ -307,6 +307,7 @@ class MethodAssemblyProtocol(db.Model):
     date = db.Column(db.Date, nullable=False)
     
     # Основная информация о заседании
+    title = db.Column(db.String(128), nullable=False) # Тема заседания, используется в плане заседаний
     attendees = db.Column(db.String(255), nullable=False)
     number = db.Column(db.Integer, nullable=False)  # Номер протокола
     
@@ -334,6 +335,8 @@ class CourseItem(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
     course_type = db.Column(db.Integer, nullable=False)
     title = db.Column(db.String(120), nullable=False)
+    academic_year = db.Column(db.String(9), nullable=False)
+    term = db.Column(db.Integer, nullable=False)
     hours = db.Column(db.Integer, nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)

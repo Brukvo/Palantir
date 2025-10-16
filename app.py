@@ -59,7 +59,7 @@ server_thread = None
 # Глобальная переменная для graceful shutdown
 shutdown_flag = False
 
-CURRENT_DB_VERSION = 3  # Текущая версия схемы
+CURRENT_DB_VERSION = 4  # Текущая версия схемы
 
 def setup_database():
     """Инициализация БД и системы версионирования"""

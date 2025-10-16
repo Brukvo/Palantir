@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session, send_file, request, current_app, send_from_directory
-from models import db, Teacher, MethodAssembly, School, MethodAssemblyProtocol
+from models import db, Teacher, MethodAssembly, School, MethodAssemblyProtocol, Department, LectureItem, OpenLessonItem, CourseItem, Concert, Contest
 from forms import MethodAssemblyForm, MethodProtocolForm, MethodProtocolUploadForm
-from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file, protocol_template
+from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file, protocol_template, fetch_all_deps_report
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy import desc, select, func
 from os.path import join, exists
@@ -115,12 +115,68 @@ def protocol_get_template(id):
 # Отчёты
 @bp.route('/reports')
 def reports_list():
+    acad_year = get_academic_year()
     # получить готовность отчётов по всем отделениям
-    # получить доклады и открытые уроки по всем преподавателям
-    #! получить КПК и КПП по преподавателям
+    deps = Department.query.all()
+    reports_list = {d.id: [0, 0, 0, 0, 0] for d in deps}
+    for d in deps:
+        for report in d.reports:
+            if report.term in [1, 2, 3, 4, 5]:
+                reports_list[d.id][report.term-1] = 1
+    
+    report_avail = {
+        1: False,
+        2: False,
+        3: False,
+        4: False,
+        5: False
+        }
+
+    for i in range(5):
+        res = 0
+        for dep in deps:
+            if reports_list[dep.id][i]:
+                res += 1
+        if res == len(deps):
+            report_avail[i+1] = True
+    # получить доклады по всем преподавателям
+    lectures = {1: [], 2: [], 3: [], 4: []}
+    for l in LectureItem.query.filter_by(academic_year=acad_year).all():
+        lectures[l.term].append(l)
+
+    # получить открытые уроки по всем преподавателям
+    open_lessons = {1: [], 2: [], 3: [], 4: []}
+    for ol in OpenLessonItem.query.filter_by(academic_year=acad_year).all():
+        open_lessons[ol.term].append(ol)        
+
+    # получить КПК и КПП по преподавателям
+    courses = {1: [], 2: [], 3: [], 4: []}
+    for c in CourseItem.query.filter_by(academic_year=acad_year).all():
+        courses[c.term].append(c)
+
     #* получить концерты и участие детей
+    concerts = {1: [], 2: [], 3: [], 4: []}
+    for con in Concert.query.filter_by(academic_year=acad_year).all():
+        concerts[con.term].append(con)
+    
     #* получить конкурсы и участие детей (с результатами)
-    return render_template('methodic/reports_list.html', title='Отчёты заведующего методическим объединением')
+    contests = {1: [], 2: [], 3: [], 4: []}
+    for ct in Contest.query.filter_by(academic_year=acad_year).all():
+        contests[ct.term].append(ct)
+
+    return render_template('methodic/reports_list.html', title='Отчёты заведующего методическим объединением', lectures=lectures, open_lessons=open_lessons, courses=courses, concerts=concerts, contests=contests, class_reports=report_avail)
+
+@bp.route('/reports/get_<int:term>')
+def report_get_by_term(term):
+    academic_year = get_academic_year()
+    file_stream = fetch_all_deps_report(term, is_method=True)
+    filename = f"Отчёт_{term}ч_{academic_year}.docx"
+    return send_file(
+        file_stream,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
 
 @bp.route('/reports/add', methods=['GET', 'POST'])
 def reports_add():

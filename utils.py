@@ -6,7 +6,7 @@ from io import BytesIO
 from os.path import join, exists
 from os import remove
 from datetime import datetime
-from models import Exam, ExamItem, ExamType, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem, School, MethodAssemblyProtocol
+from models import Contest, CourseItem, Exam, ExamItem, ExamType, LectureItem, OpenLessonItem, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem, School, MethodAssemblyProtocol
 from extensions import db
 from sqlalchemy import desc, select, text
 from flask_wtf.file import FileStorage
@@ -454,7 +454,7 @@ def generate_dep_report(dep_id, term, with_title=True):
     
     return file_stream
 
-def fetch_all_deps_report(term):
+def fetch_all_deps_report(term, is_method=False):
     # собираем данные о школе
     school = School.query.first()
     # собрать все отделения
@@ -508,6 +508,9 @@ def fetch_all_deps_report(term):
                 exam_block.add_run(f'\n\t– удовлетворительно: {exam.got_avg}')
             if exam.got_bad:
                 exam_block.add_run(f'\n\t– неудовлетворительно: {exam.got_bad}')
+    
+    if is_method:
+        doc = method_report(term, doc)
     file_stream = BytesIO()
     doc.save(file_stream)
     file_stream.seek(0)
@@ -564,3 +567,50 @@ def protocol_template(protocol: MethodAssemblyProtocol):
     doc.save(file_stream)
     file_stream.seek(0)
     return file_stream
+
+def method_report(term, doc: Document):
+    methodic_work = doc.add_paragraph()
+    methodic_work.add_run('Методическая работа').underline = True
+
+    stuff = {
+        1: ['Заполнены аналитические справки, протоколы промежуточной аттестации по результатам успеваемости за I четверть', 'Проверены индивидуальные планы обучающихся, журналы преподавателей. Даны замечания и рекомендации', 'Утверждены репертуарные списки преподавателей по предметам ПРЕДМЕТЫ', 'Утверждена выпускная программа обучающихся', 'Проведено общешкольное родительское собрание обучающихся 1 класса', 'Проведены родительские собрания в классах преподавателей: УКАЗАТЬ СОБРАНИЯ СПИСКОМ'],
+        2: ['Заполнены аналитические справки, протоколы промежуточной аттестации по результатам успеваемости за II четверть', 'Проверены индивидуальные планы обучающихся, журналы преподавателей. Даны замечания и рекомендации'],
+        3: ['Заполнены аналитические справки, протоколы промежуточной аттестации по результатам успеваемости за III четверть', 'Проверены индивидуальные планы обучающихся, журналы преподавателей. Даны замечания и рекомендации', 'Заполнение консультационных часов'],
+        4: ['Заполнены аналитические справки, протоколы промежуточной аттестации по результатам успеваемости за IV четверть и за год', 'Проверены индивидуальные планы обучающихся, журналы преподавателей. Даны замечания и рекомендации', 'Сданы консультационные часы']
+    }
+
+    usual_stuff = doc.add_paragraph()
+    for item in stuff[term]:
+        usual_stuff.add_run(f'— {item}' + '\n')
+
+    # получить доклады по всем преподавателям
+    lectures = LectureItem.query.filter_by(term=term).all()
+    if lectures:
+        doc_lectures = doc.add_paragraph()
+        for lecture in lectures:
+            doc_lectures.add_run(f'— Зачитан доклад на тему "{lecture.title}", преп. {lecture.teacher.short_name}, {lecture.date.strftime("%d.%m.%Y")}\n')
+    
+    # получить открытые уроки по всем преподавателям
+    open_lessons = OpenLessonItem.query.filter_by(term=term).all()
+    if open_lessons:
+        doc_lessons = doc.add_paragraph()
+        for lesson in open_lessons:
+            doc_lessons.add_run(f'— Проведён открытый урок "{lesson.title}" (lesson.student.short_name), преп. {lesson.teacher.short_name}, {lesson.date.strftime("%d.%m.%Y")}\n')
+
+    # получить КПК и КПП по преподавателям
+    courses = CourseItem.query.filter_by(term=term).all()
+
+    concert_work = doc.add_paragraph()
+    concert_work.add_run('Внеклассная работа').underline = True
+
+    #* получить концерты и участие детей
+    concerts = Concert.query.filter_by(term=term).all()
+    if concerts:
+        doc_concerts = doc.add_paragraph()
+        for concert in concerts:
+            doc_concerts.add_run(f'— {concert.title} ({concert.date.strftime("%d.%m.%Y")}). Принимали участие обучающиеся преподавателей ПРЕПОДАВАТЕЛИ\n')
+    
+    #* получить конкурсы и участие детей (с результатами)
+    contests = Contest.query.filter_by(term=term).all()
+
+    return doc
