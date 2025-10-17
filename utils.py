@@ -485,7 +485,7 @@ def fetch_all_deps_report(term, is_method=False):
         exams = reports[dep][1:]
         dep_block_title = doc.add_paragraph()
         dep_block_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        dep_block_title.add_run(f'{dep_report.department.title[0].upper()}{dep_report.department.title[1:]}').bold = True
+        dep_block_title.add_run(f'{dep_report.department.title.capitalize()}').bold = True
         dep_block = doc.add_paragraph(f'Всего на отделении обучающихся: {dep_report.total}, из них:')
         if dep_report.got_best:
             dep_block.add_run(f'\n\t– отлично: {dep_report.got_best}')
@@ -498,7 +498,7 @@ def fetch_all_deps_report(term, is_method=False):
     # результаты зачётов и экзаменов на этом отделении
         for exam in exams:
             exam_block = doc.add_paragraph()
-            exam_block.add_run(f'{exam.exam_type.name[0].upper()}{exam.exam_type.name[1:]}, результаты:').italic = True
+            exam_block.add_run(f'{exam.exam_type.name.capitalize()}, результаты:').italic = True
             exam_block.add_run(f'\nВсего сдавало обучающихся: {exam.total}, из них:')
             if exam.got_best:
                 exam_block.add_run(f'\n\t– отлично: {exam.got_best}')
@@ -612,14 +612,14 @@ def method_report(term, doc: Document):
     concert_work = doc.add_paragraph()
     concert_work.add_run('Внеклассная работа').underline = True
 
-    #* получить концерты и участие детей
+    # получить концерты и участие детей
     concerts = Concert.query.filter_by(term=term).all()
     if concerts:
         doc_concerts = doc.add_paragraph()
         for concert in concerts:
             doc_concerts.add_run(f'— {concert.title} ({concert.date.strftime("%d.%m.%Y")}). Принимали участие обучающиеся преподавателей ПРЕПОДАВАТЕЛИ\n')
     
-    #* получить конкурсы и участие детей (с результатами)
+    # получить конкурсы и участие детей (с результатами)
     contests = Contest.query.filter_by(term=term).all()
     if contests:
         for contest in contests:
@@ -634,3 +634,6 @@ def method_report(term, doc: Document):
                     doc_contest.add_run(f'⏺ {part.ensemble.name} ({", ".join(members_list)}; рук. {part.ensemble.teacher.short_name}): {part.result}')
 
     return doc
+
+def method_assembly_plan(semester):
+    pass
