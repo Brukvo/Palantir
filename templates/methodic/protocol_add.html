@@ -6,6 +6,13 @@
 <h2>{{title}}</h2>
 <form action="{{ url_for('method.protocols_add') }}" method="post" enctype="multipart/form-data">
     {{ form.csrf_token }}
+    <div class="uk-margin">
+        <div class="uk-form-controls">
+            {{ form.title(class='uk-input uk-form-large uk-border-rounded', placeholder=form.title.label|striptags) }}
+            {% if form.title.description %}<span class="uk-text-small uk-text-muted">{{ form.title.description }}</span>{% endif
+            %}
+        </div>
+    </div>
     <div class="uk-child-width-1-4" uk-grid>
         <div>
             <div class="uk-margin">
@@ -29,7 +36,9 @@
             <div class="uk-margin">
                 <label class="uk-form-label">Период</label>
                 <div class="uk-form-controls">
-                    <input name="term" id="term" value="{% if term in [1, 2, 3, 4] %}{{ term }} четверть {% else %}Год{% endif %}" disabled class="uk-input uk-border-rounded">
+                    <input name="term" id="term"
+                        value="{% if term in [1, 2, 3, 4] %}{{ term }} четверть {% else %}Год{% endif %}" disabled
+                        class="uk-input uk-border-rounded">
                 </div>
             </div>
         </div>
@@ -64,7 +73,8 @@
         <label class="uk-form-label">{{ form.protocol_file.label }}:</label>
         <div uk-form-custom>
             &ensp;{{ form.protocol_file(class='uk-file uk-border-rounded') }}
-            <button class="uk-button uk-button-default uk-border-rounded" type="button" tabindex="-1">Выбрать файл протокола</button>
+            <button class="uk-button uk-button-default uk-border-rounded" type="button" tabindex="-1">Выбрать файл
+                протокола</button>
         </div>
     </div>
 

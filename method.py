@@ -29,6 +29,7 @@ def protocols_add():
                 protocol_num += 1
 
             protocol = MethodAssemblyProtocol(
+                title=form.title.data,
                 term=get_term(form.date.data),
                 academic_year=get_academic_year(form.date.data),
                 date=form.date.data,

@@ -598,7 +598,16 @@ def method_report(term, doc: Document):
             doc_lessons.add_run(f'— Проведён открытый урок "{lesson.title}" (lesson.student.short_name), преп. {lesson.teacher.short_name}, {lesson.date.strftime("%d.%m.%Y")}\n')
 
     # получить КПК и КПП по преподавателям
-    courses = CourseItem.query.filter_by(term=term).all()
+    t_courses = CourseItem.query.filter_by(term=term, course_type=1).all()
+    r_courses = CourseItem.query.filter_by(term=term, course_type=2).all()
+    if t_courses:
+        doc_t_courses = doc.add_paragraph('— Курсы повышения квалификации: \n')
+        for course in t_courses:
+            doc_t_courses.add_run(f'\t⏺ {course.teacher.short_name}: {course.title} ({course.place}), {course.hours}ч, {course.start_date.strftime("%d.%m.%Y")}-{course.end_date.strftime("%d.%m.%Y")}\n')
+    if r_courses:
+            doc_r_courses = doc.add_paragraph('— Курсы профессиональной переподготовки: \n')
+            for course in r_courses:
+                doc_r_courses.add_run(f'\t⏺ {course.teacher.short_name}: {course.title} ({course.place}), {course.hours}ч, {course.start_date.strftime("%d.%m.%Y")}-{course.end_date.strftime("%d.%m.%Y")}\n')
 
     concert_work = doc.add_paragraph()
     concert_work.add_run('Внеклассная работа').underline = True
@@ -612,5 +621,16 @@ def method_report(term, doc: Document):
     
     #* получить конкурсы и участие детей (с результатами)
     contests = Contest.query.filter_by(term=term).all()
+    if contests:
+        for contest in contests:
+            doc_contest = doc.add_paragraph(f'— {contest.title} ({contest.place}):\n')
+            for part in contest.participations:
+                if part.student_id is not None:
+                    doc_contest.add_run(f'⏺ {part.student.short_name} (кл. преп. {part.student.lead_teacher.short_name}): {part.result}\n')
+                else:
+                    members_list = []
+                    for member in part.ensemble.members:
+                        members_list.append(member.student.short_name)
+                    doc_contest.add_run(f'⏺ {part.ensemble.name} ({", ".join(members_list)}; рук. {part.ensemble.teacher.short_name}): {part.result}')
 
     return doc

@@ -154,6 +154,7 @@ class MethodAssemblyForm(FlaskForm):
 
 class MethodProtocolForm(FlaskForm):
     # Основная информация о заседании
+    title = StringField('Заголовок', description='Используется при формировании плана методических заседаний', validators=[DataRequired()])
     date = DateField('Дата заседания', validators=[DataRequired()], default=date.today)
     # Содержание протокола
     agenda = TextAreaField('Повестка', validators=[DataRequired()])  # Повестка дня
