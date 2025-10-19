@@ -34,13 +34,13 @@
 <h3>Повестка</h3>
 <p class="uk-margin-left">
     {% for agenda in protocol.agenda.split('\n') %}
-    &ndash; {{ agenda }}<br>
+    {{loop.index}}. {{ agenda|safe }}<br>
     {% endfor %}
 </p>
 <h3>Постановили</h3>
 <p class="uk-margin-left">
-    {% for decision in protocol.decisions.split('\n') %}
-    &ndash; {{ decision }}<br>
+    {% for decision in protocol.decisions.split(';') %}
+    &emsp;{{loop.index}}. {{ decision.replace('\n\t', '<br>&emsp; ')|safe }}<br>
     {% endfor %}
 </p>
 

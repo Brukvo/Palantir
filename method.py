@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session, send_file, request, current_app, send_from_directory
 from models import db, Teacher, MethodAssembly, School, MethodAssemblyProtocol, Department, LectureItem, OpenLessonItem, CourseItem, Concert, Contest
 from forms import MethodAssemblyForm, MethodProtocolForm, MethodProtocolUploadForm
-from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file, protocol_template, fetch_all_deps_report
+from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file, protocol_template, fetch_all_deps_report, embed_dep_report, render_report_template
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy import desc, select, func
 from os.path import join, exists
@@ -56,6 +56,7 @@ def protocols_add():
 @bp.get('/protocol/<int:id>/view')
 def protocol_view(id):
     protocol = MethodAssemblyProtocol.query.get_or_404(id)
+    protocol.decisions = render_report_template(protocol.decisions)
     form = MethodProtocolUploadForm()
     return render_template('methodic/protocol_view.html', protocol=protocol, title=f'Протокол методического заседания №{protocol.number} от {protocol.date.strftime("%d.%m.%Y")}', form=form)
 
