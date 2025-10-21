@@ -201,8 +201,8 @@ def generate_protocol(exam: Exam, exam_items, props):
         st.add_run(f'{ei.student.short_name}, {ei.student.class_level}/{ei.student.study_years}').bold = True
         st.add_run(f' ({deep_level}кл. преп.: {ei.teacher.short_name})')
         pieces = ei.program.split('\r\n')
-        for piece in pieces:
-            st.add_run(f'\n\t{piece}')
+        for i, piece in enumerate(pieces, start=1):
+            st.add_run(f'\n\t{i}. {piece}')
         st.add_run(f'\n\t\tОценка: ')
         st.add_run(ei.grade).bold = True
 
