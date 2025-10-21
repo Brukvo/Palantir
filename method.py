@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session, send_file, request, current_app, send_from_directory
 from models import db, Teacher, MethodAssembly, School, MethodAssemblyProtocol, Department, LectureItem, OpenLessonItem, CourseItem, Concert, Contest
 from forms import MethodAssemblyForm, MethodProtocolForm, MethodProtocolUploadForm
-from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file, protocol_template, fetch_all_deps_report, embed_dep_report, render_report_template
+from utils import get_academic_year, events_plan, get_term, upload_file, protocol_delete_file, protocol_download, fetch_all_deps_report, embed_dep_report, render_report_template
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy import desc, select, func
 from os.path import join, exists
@@ -26,8 +26,8 @@ def protocols_add():
             last_protocol = MethodAssemblyProtocol.query.filter_by(academic_year=get_academic_year()).order_by(MethodAssemblyProtocol.number.desc()).first()
             protocol_num = 1
             if last_protocol and last_protocol.number:
-                protocol_num += 1
-
+                protocol_num = last_protocol.number + 1
+            
             protocol = MethodAssemblyProtocol(
                 title=form.title.data,
                 term=get_term(form.date.data),
@@ -102,10 +102,10 @@ def protocol_delete(id):
         flash(f'Произошла ошибка: {e}')
         return redirect(url_for('method.protocol_view', id=protocol.id))
 
-@bp.get('/protocol/<int:id>/get_template')
-def protocol_get_template(id):
+@bp.get('/protocol/<int:id>/get_protocol')
+def protocol_get(id):
     protocol = MethodAssemblyProtocol.query.get_or_404(id)
-    file_stream = protocol_template(protocol)
+    file_stream = protocol_download(protocol)
     filename = f"Протокол_{protocol.number}_{protocol.date.strftime('%d-%m-%Y')}.docx"
     return send_file(
         file_stream,

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
-from models import db, Student, Department, Teacher, Concert, ConcertParticipation, Contest, ContestParticipation, Ensemble, DepartmentReportItem, School
+from models import db, Student, Department, Teacher, Concert, ConcertParticipation, Contest, ContestParticipation, Ensemble, DepartmentReportItem, School, Exam
 from forms import DepartmentForm, DepartmentReportForm
 from utils import get_academic_year, get_term, generate_dep_report, get_deps_students, fetch_all_deps_report
 from sqlalchemy.exc import IntegrityError
@@ -83,7 +83,8 @@ def view(id):
             ).all()
             student.ensemble_participations.extend(participations)
             student.contest_ens_participations.extend(ens_participations)
-    return render_template('departments/view.html', department=department, students=students, title=department.title.capitalize())
+    exams = Exam.query.filter_by(department_id=department.id).all()
+    return render_template('departments/view.html', department=department, students=students, title=department.title.capitalize(), exams=exams)
 
 @bp.route('/add', methods=['GET', 'POST'])
 def add():

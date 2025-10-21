@@ -9,38 +9,83 @@
     <a href="{{ url_for('departments.report', id=department.id) }}" class="uk-icon-button" uk-icon="file-text"
         uk-tooltip="title: Сдать отчёт по успеваемости; pos: bottom"></a>
 </h2>
-{% if department.reports %}
-<h4>Отчёты об успеваемости</h4>
-<table class="uk-table uk-table-small uk-table-hover uk-table-stripe">
-    <tr>
-        <th>Уч. год</th>
-        <th>Период</th>
-        <th>Учеников</th>
-        <th>5</th>
-        <th>4</th>
-        <th>3</th>
-        <th>2</th>
-        <th>Кол.%</th>
-        <th>Кач.%</th>
-        <th></th>
-    </tr>
-    {% for report in department.reports %}
-    <tr>
-        <td>{{report.academic_year}}</td>
-        <td>{{report.term}}</td>
-        <td>{{report.total}}</td>
-        <td>{{report.got_best}}</td>
-        <td>{{report.got_good}}</td>
-        <td>{{report.got_avg}}</td>
-        <td>{{report.got_bad}}</td>
-        <td>{{report.quantity}}</td>
-        <td>{{report.quality}}</td>
-        <td><a href="{{ url_for('departments.get_dep_report', dep_id=department.id, term=report.term) }}"
-                class="uk-icon-button" uk-icon="file-text"></a></td>
-    </tr>
-    {% endfor %}
-</table>
-{% endif %}
+
+<ul class="uk-accordion" uk-accordion>
+    {% if department.reports %}
+    <li>
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Отчёты об успеваемости</a>
+        <div class="uk-accordion-content">
+            <table class="uk-table uk-table-small uk-table-hover uk-table-stripe">
+                <tr>
+                    <th>Уч. год</th>
+                    <th>Период</th>
+                    <th>Учеников</th>
+                    <th>5</th>
+                    <th>4</th>
+                    <th>3</th>
+                    <th>2</th>
+                    <th>Кол.%</th>
+                    <th>Кач.%</th>
+                    <th></th>
+                </tr>
+                {% for report in department.reports %}
+                <tr>
+                    <td>{{report.academic_year}}</td>
+                    <td>{{report.term}}</td>
+                    <td>{{report.total}}</td>
+                    <td>{{report.got_best}}</td>
+                    <td>{{report.got_good}}</td>
+                    <td>{{report.got_avg}}</td>
+                    <td>{{report.got_bad}}</td>
+                    <td>{{report.quantity}}</td>
+                    <td>{{report.quality}}</td>
+                    <td><a href="{{ url_for('departments.get_dep_report', dep_id=department.id, term=report.term) }}"
+                            class="uk-icon-button" uk-icon="file-text"></a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </li>
+    {% endif %}
+    {% if exams %}
+    <li>
+        <a class="uk-accordion-title"><span uk-icon="more"></span>&ensp;Зачёты и экзамены</a>
+        <div class="uk-accordion-content">
+            <table class="uk-table uk-table-small uk-table-hover">
+                <tr>
+                    <th>П</th>
+                    <th>Дата</th>
+                    <th>Тип</th>
+                    <th>Всего</th>
+                    <th>5</th>
+                    <th>4</th>
+                    <th>3</th>
+                    <th>2</th>
+                    <th>н</th>
+                    <th>кол</th>
+                    <th>кач</th>
+                </tr>
+                {% for exam in exams %}
+                <tr>
+                    <td>{{ exam.term }}</td>
+                    <td>{{ exam.date.strftime("%d.%m.%Y") }}</td>
+                    <td>{{ exam.exam_type.name }}</td>
+                    <td>{{ exam.total }}</td>
+                    <td>{{ exam.got_best }}</td>
+                    <td>{{ exam.got_good }}</td>
+                    <td>{{ exam.got_avg }}</td>
+                    <td>{{ exam.got_bad }}</td>
+                    <td>{{ exam.got_nothing }}</td>
+                    <td>{{ exam.quantity }}%</td>
+                    <td>{{ exam.quality }}%</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </li>
+    {% endif %}
+</ul>
+
 <h4>Преподаватели отделения</h4>
 <table class="uk-table uk-table-small uk-table-striped">
     <tr>
@@ -62,16 +107,16 @@
         <td><a href="{{ url_for('teachers.view', id=teacher.id) }}">{{ teacher.full_name }}</a></td>
         <td class="uk-text-center">{{ teacher.students|count }}</td>
         {% if teacher.class_reports %}
-            {% for class_report in teacher.class_reports %}
-                {% for term in range(1, 6) %}
+        {% for class_report in teacher.class_reports %}
+        {% for term in range(1, 6) %}
         <td class="uk-text-center"><span
                 class="uk-text-{% if class_report.term == term %}success{% else %}warning{% endif %}">●</span></td>
-                {% endfor %}
-            {% endfor %}
+        {% endfor %}
+        {% endfor %}
         {% else %}
-            {% for i in range(5) %}
-                <td class="uk-text-center"><span class="uk-text-warning">●</span></td>
-            {% endfor %}
+        {% for i in range(5) %}
+        <td class="uk-text-center"><span class="uk-text-warning">●</span></td>
+        {% endfor %}
         {% endif %}
     </tr>
     {% endfor %}

@@ -6,7 +6,7 @@
 <h2>{{title}}
     {% if protocol.protocol_file %}<a href="{{url_for('method.protocol_retrieve', id=protocol.id)}}" class="uk-icon-button uk-text-secondary" uk-icon="download" uk-tooltip="title: Скачать протокол; pos: bottom"></a>
     {% endif %}
-    <a href="{{ url_for('method.protocol_get_template', id=protocol.id) }}" uk-icon="cloud-download" class="uk-icon-button" uk-tooltip="title: Скачать заготовку протокола; pos: bottom"></a>
+    <a href="{{ url_for('method.protocol_get', id=protocol.id) }}" uk-icon="cloud-download" class="uk-icon-button" uk-tooltip="title: Скачать заготовку протокола; pos: bottom"></a>
     <a href="{{ url_for('method.protocol_delete', id=protocol.id) }}" uk-icon="trash" class="uk-icon-button uk-button-danger" uk-tooltip="title: Удалить протокол; pos: bottom"></a>
 </h2>
 <p class="uk-alert uk-alert-secondary"><b>Участвовали: </b>{{ ', '.join(protocol.attendees.split('\n')) }}</p>
@@ -32,15 +32,17 @@
 
 {% endif %}
 <h3>Повестка</h3>
-<p class="uk-margin-left">
+<p>
     {% for agenda in protocol.agenda.split('\n') %}
-    {{loop.index}}. {{ agenda|safe }}<br>
+    &emsp;{{loop.index}}. {{ agenda|safe }}<br>
     {% endfor %}
 </p>
 <h3>Постановили</h3>
 <p class="uk-margin-left">
     {% for decision in protocol.decisions.split(';') %}
-    &emsp;{{loop.index}}. {{ decision.replace('\n\t', '<br>&emsp; ')|safe }}<br>
+    {% if decision != '' %}
+    {{loop.index}}. {{ decision.replace('\n\t', '<br>&emsp; ')|safe }}<br>
+    {% endif %}
     {% endfor %}
 </p>
 
