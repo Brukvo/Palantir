@@ -206,7 +206,7 @@ def generate_protocol(exam: Exam, exam_items, props):
         st.add_run(f'\n\t\tОценка: ')
         st.add_run(ei.grade).bold = True
 
-    stats = doc.add_paragraph(f"Всего сдавало {props['total']} обуч., из них:")
+    stats = doc.add_paragraph(f"Всего сдавало обучающихся: {props['total']}, из них:")
     
     if props['grades']['5']:
         stats.add_run(f"\n\t– отлично: ")
