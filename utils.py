@@ -184,7 +184,7 @@ def generate_protocol(exam: Exam, exam_items, props):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.add_run(f'Протокол №{exam.protocol_number} от {exam.date.strftime("%d.%m.%Y")}').bold = True
-    p.add_run('\n' + exam_type)
+    p.add_run(f'\n{exam_type} по предмету {exam.discipline} ({exam.department.short_name})')
     p.add_run(f"\n{exam.academic_year} учебный год").italic = True
 
     teach_list = doc.add_paragraph()
@@ -209,23 +209,23 @@ def generate_protocol(exam: Exam, exam_items, props):
     stats = doc.add_paragraph(f"Всего сдавало {props['total']} обуч., из них:")
     
     if props['grades']['5']:
-        stats.add_run(f"\n\t\"отлично\": ")
+        stats.add_run(f"\n\t– отлично: ")
         stats.add_run(str(props['grades']['5'])).bold = True
 
     if props['grades']['4']:
-        stats.add_run(f"\n\t\"хорошо\": ")
+        stats.add_run(f"\n\t– хорошо: ")
         stats.add_run(str(props['grades']['4'])).bold = True
 
     if props['grades']['3']:
-        stats.add_run(f"\n\t\"удовлетворительно\": ")
+        stats.add_run(f"\n\t– удовлетворительно: ")
         stats.add_run(str(props['grades']['3'])).bold = True
 
     if props['grades']['2']:
-        stats.add_run(f"\n\t\"неудовлетворительно\": ")
+        stats.add_run(f"\n\t– неудовлетворительно: ")
         stats.add_run(str(props['grades']['2'])).bold = True
 
     if props['grades']['1']:
-        stats.add_run(f"\n\tне сдавало (по уважительной причине): ")
+        stats.add_run(f"\n\t– не сдавало (по уважительной причине): ")
         stats.add_run(str(props['grades']['1'])).bold = True
 
     indicators = doc.add_paragraph(f"Количественная успеваемость: {props['quantity']}%")
