@@ -184,8 +184,8 @@ def generate_protocol(exam: Exam, exam_items, props):
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.add_run(f'Протокол №{exam.protocol_number} от {exam.date.strftime("%d.%m.%Y")}').bold = True
-    p.add_run(f'\n{exam_type} по предмету {exam.discipline} ({exam.department.short_name})')
-    p.add_run(f"\n{exam.academic_year} учебный год").italic = True
+    p.add_run(f'\n{exam_type.capitalize()}, {exam.discipline} ("{exam.department.title.capitalize()})"').italic = True
+    # p.add_run(f"\n{exam.academic_year} учебный год").italic = True
 
     teach_list = doc.add_paragraph()
     teach_list.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
