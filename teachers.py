@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, session, send_file
+from flask import Blueprint, render_template, redirect, url_for, flash, session, send_file, request
 from models import db, Exam, Student, ExamType, Department, ExamItem, Teacher, Subject, ReportItem, ClassReportItem, LectureItem, OpenLessonItem, ConcertParticipation, ContestParticipation, CourseItem
 from forms import TeacherForm, ReportForm, LectureForm, OpenLessonForm, ClassReportForm, TeacherCourseForm
 from utils import get_academic_year, get_term
@@ -155,7 +155,8 @@ def send_class_report(id):
     teacher = Teacher.query.get_or_404(id)
     form = ClassReportForm()
     total = len(teacher.students)
-    form.term.data = get_term()
+    if request.method == 'GET':
+        form.term.data = get_term()
     if form.validate_on_submit():
         for field in [form.got_avg, form.got_bad, form.got_best, form.got_good]:
             field.data = 0 if field.data is None else field.data

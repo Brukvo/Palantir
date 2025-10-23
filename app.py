@@ -176,6 +176,8 @@ def retrieve_favicon():
 
 @app.before_request
 def get_credentials():
+    g.academic_year = get_academic_year()
+    g.term = get_term()
     try:
         deps = Department.query.count()
         students = Student.query.count()

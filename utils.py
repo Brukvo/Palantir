@@ -6,7 +6,7 @@ from io import BytesIO
 from os.path import join, exists
 from os import remove
 from datetime import datetime
-from models import Contest, CourseItem, Exam, ExamItem, ExamType, LectureItem, OpenLessonItem, Student, Department, Teacher, Concert, DepartmentReportItem, ClassReportItem, School, MethodAssemblyProtocol
+from models import Contest, CourseItem, Exam, ExamItem, ExamType, LectureItem, OpenLessonItem, Student, Department, Teacher, Concert, ReportItem, DepartmentReportItem, ClassReportItem, School, MethodAssemblyProtocol
 from extensions import db
 from sqlalchemy import desc, select, text, distinct
 from flask_wtf.file import FileStorage
@@ -784,10 +784,10 @@ def embed_events_stats(event_type='все', term=None):
         'все': [Concert.query, Contest.query]
     }
     events = []
-    if term is not None:
+    if term is not None and event_type in event_types.keys():
         for ev_type in event_types[event_type]:
             events.extend(ev_type.filter_by(term=term, academic_year=academic_year).all())
-    else:
+    elif term is None and event_type in event_types.keys():
         for ev_type in event_types[event_type]:
             events.extend(ev_type.filter_by(academic_year=academic_year).all())
 
