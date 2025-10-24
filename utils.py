@@ -15,8 +15,43 @@ from flask import current_app
 from datetime import date
 import os
 import logging
+import re
+from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
+
+# Общий словарь для всех паттернов
+PATTERNS = {
+    'события': re.compile(r'\[события:(?P<event_type>\w+):?(?P<term>\d+)?\]'),
+    'успеваемость': re.compile(r'\[успеваемость:(?P<term>\d+)?:?(?P<dep_name>\w+)\]'),
+    'все_события': re.compile(r'\[события\]'),
+    'результаты': re.compile(r'\[результаты:(?P<exam_type>\w+):?(?P<term>\d+)?\]'),
+}
+
+def parse_tag(tag: str) -> Dict[str, Any]:
+    """
+    Парсит тег и возвращает словарь с параметрами
+    """
+    for key, pattern in PATTERNS.items():
+        match = pattern.match(tag)
+        if match:
+            return {
+                'type': key,
+                **match.groupdict()
+            }
+    return None
+
+def remove_tags(text):
+    # Шаблон для поиска тегов вида [успеваемость:...] и [события:...]
+    tag_pattern = re.compile(r'\[[^\[\]]*\]')
+    
+    # Функция замены, которая удаляет найденные теги
+    def replace_tags(match):
+        return ''
+    
+    # Удаляем все теги и возвращаем оставшийся текст
+    result = tag_pattern.sub(replace_tags, text)
+    return result
 
 def get_db_version():
     """Получает текущую версию схемы БД"""
@@ -560,7 +595,7 @@ def protocol_download(protocol: MethodAssemblyProtocol):
     decisions_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     decisions_title.add_run('Постановили:').italic = True
 
-    doc = doc_process_tags(doc, protocol)
+    # doc = doc_process_tags(doc, protocol)
 
     file_stream = BytesIO()
     doc.save(file_stream)
@@ -638,7 +673,7 @@ def method_assembly_plan(semester):
     """Генерирует план заседаний методического объединения"""
     pass
 
-def render_report_template(template_text, is_doc=False):
+def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
     """Заменяет теги в тексте на данные из БД с поддержкой параметров"""
     
     # Базовые замены
@@ -649,227 +684,160 @@ def render_report_template(template_text, is_doc=False):
         '[количество_учеников]': str(Student.query.filter_by(status_id=1).count()),
         '[количество_преподавателей]': str(Teacher.query.count())
     }
+    protocol.decisions = protocol.decisions.replace('\r\n', '').replace('\n', '')
     
     # Применяем простые замены
     for tag, replacement in replacements.items():
-        template_text = template_text.replace(tag, replacement)
-    
-    if not is_doc:
-        # Обрабатываем сложные теги с параметрами
-        template_text = process_complex_tags(template_text)
-    return template_text
+        protocol.decisions = protocol.decisions.replace(tag, replacement)
 
-
-def process_complex_tags(text):
-    """Обрабатывает сложные теги, включая теги с параметрами"""
-
-    if '[события]' in text:
-        events = embed_events_stats()
-        text = text.replace('[события]', events)
-
-    # Отчёт по отделению за конкретную четверть
-    # if '[отчет_отделения:' in text:
-    if '[успеваемость:' in text:
-        start_idx = 0
-        while True:
-            start_idx = text.find('[успеваемость:', start_idx)
-            if start_idx == -1:
-                break
-                
-            end_idx = text.find(']', start_idx + 2)
-            if end_idx == -1:
-                break
-                
-            full_tag = text[start_idx:end_idx + 1]
-            params = full_tag.replace('[успеваемость:', '').replace(']', '').split(':')
-            params = [p.strip() for p in params]
-            if len(params) >= 1:
-                term = int(params[0]) if params[0].isdigit() else None
-                dep_name = params[1].replace('_', ' ').strip() if len(params) > 1 else 'все'
-                
-                # Ищем отделение по названию
-                dep = Department.query.filter((Department.title.ilike(f'%{dep_name}%'))).first()
-                
-                report = embed_dep_report(dep if dep else 'все', term)
-                text = text.replace(full_tag, report)
-            else:
-                report = embed_dep_report('все', term)
-                text = text.replace(full_tag, report)
-
-            start_idx = end_idx + 2
-    
-    # Статистика концертов/конкурсов за период
-    if '[события:' in text:
-        start_idx = 0
-        while True:
-            start_idx = text.find('[события:', start_idx)
-            if start_idx == -1:
-                break
-                
-            end_idx = text.find(']', start_idx + 2)
-            if end_idx == -1:
-                break
-                
-            full_tag = text[start_idx:end_idx + 1]
-            params = full_tag.replace('[события:', '').replace(']', '').split(':')
-            
-            event_type = params[0] if params else 'все'  # концерты, конкурсы, все
-            term = int(params[1]) if len(params) > 1 and params[1].isdigit() else None
-            
-            stats = embed_events_stats(event_type, term)
-            text = text.replace(full_tag, stats)
-            
-            start_idx = end_idx + 2
-    
-    return text
-
-def embed_dep_report(dep: Department, term: int):
-    academic_year = get_academic_year()
-    if dep == 'все':
-        print(f'{dep=}', ', выбираем все отделения')
-        if term is not None:
-            reports = DepartmentReportItem.query.filter_by(term=term, academic_year=academic_year).all()
-        else:
-            reports = DepartmentReportItem.query.filter_by(academic_year=academic_year).all()
-    else:
-        print(f'{dep=}', 'выбираем переданное отделение')
-        if term is not None:
-            reports = DepartmentReportItem.query.filter_by(department_id=dep.id, term=term, academic_year=academic_year).all()
-        else:
-            reports = DepartmentReportItem.query.filter_by(department_id=dep.id, academic_year=academic_year).all()
-
-    print(f'Отчёты: {reports=}')
-    if not reports:
-        return f'<br>За {term} четверть отчёты отделения <b>{dep.title}</b> не найдены.<br>'
-    
-    period = f'{term} четверть' if term in [1, 2, 3, 4] else 'год'
-    report_text = '<p>'
-    for report in reports:
-        report_text += f'Успеваемость на отделении <span class="uk-text-bold">{report.department.title.capitalize()}</span>:<br>Всего на отделении обучающихся: <b>{len(report.department.students)}</b>, из них {period} окончили:<br>'
-        if report.got_best:
-            report_text += f'\t—  отлично: <b>{report.got_best}</b><br>'
-        if report.got_good:
-            report_text += f'\t—  хорошо: <b>{report.got_good}</b><br>'
-        if report.got_avg:
-            report_text += f'\t—  удовлетворительно: <b>{report.got_avg}</b><br>'
-        if report.got_bad:
-            report_text += f'\t—  неудовлетворительно: <b>{report.got_bad}</b><br>'
-        report_text += f'Количественная успеваемость: {report.quantity}%<br>Качественная успеваемость: {report.quality}%<br>'
-
-        exams = Exam.query.filter_by(department_id=report.department_id, term=term, academic_year=academic_year).all()
-        if exams:
-            for exam in exams:
-                report_text += f'<p class="uk-margin-left"><i>{exam.exam_type.name.capitalize()}, результаты</i><br>Всего сдавало обучающихся: {exam.total}, из этого количества:<br>'
-                if exam.got_best:
-                    report_text += f'\t—  отлично: <b>{exam.got_best}</b><br>'
-                if exam.got_good:
-                    report_text += f'\t—  хорошо: <b>{exam.got_good}</b><br>'
-                if exam.got_avg:
-                    report_text += f'\t—  удовлетворительно: <b>{exam.got_avg}</b><br>'
-                if exam.got_bad:
-                    report_text += f'\t—  неудовлетворительно: <b>{exam.got_bad}</b><br>'
-                if exam.got_nothing:
-                    report_text += f'\t—  не сдавали: <b>{exam.got_nothing}</b><br>'
-                report_text += f'Количественная успеваемость: {exam.quantity}%<br>Качественная успеваемость: {exam.quality}%</p>'
+    if to_doc:
+        print('Обрабатываем вывод в документ')
+        doc = set_font(Document(), 'PT Serif', 14)
         
-        report_text += '<br>'
-
-    return report_text + '</p>'
-
-def embed_events_stats(event_type='все', term=None):
-    academic_year = get_academic_year()
-    event_types = {
-        'концерты': [Concert.query],
-        'конкурсы': [Contest.query],
-        'все': [Concert.query, Contest.query]
-    }
-    events = []
-    if term is not None and event_type in event_types.keys():
-        for ev_type in event_types[event_type]:
-            events.extend(ev_type.filter_by(term=term, academic_year=academic_year).all())
-    elif term is None and event_type in event_types.keys():
-        for ev_type in event_types[event_type]:
-            events.extend(ev_type.filter_by(academic_year=academic_year).all())
-
-    # if not events:
-    #     return '<p>Событий этого типа за указанный период не найдено</p><br>'
-    events_text = '<p>'
-    for event in events:
-        events_text += f'{event.title} ({event.date.strftime("%d.%m.%Y")}, {event.place}). Принимали участие:<ul>'
-        if isinstance(event, Concert):
-            # events_text += f'Принимали участие: <br><ul>'
-            for participation in event.participations:
-                if participation.student_id:
-                    events_text += f'<li>{participation.student.short_name}, {participation.student.class_level}/{participation.student.study_years} (кл. преп.: {participation.student.lead_teacher.short_name})</li>'
-                if participation.ensemble_id:
-                    events_text += f'<li>{participation.ensemble.name} (рук. {participation.ensemble.teacher.short_name})</li>'
-        if isinstance(event, Contest):
-            for part in event.participations:
-                if part.student_id:
-                    events_text += f'<li>{part.student.short_name}, {part.student.class_level}/{part.student.study_years} (кл. преп.: {part.student.lead_teacher.short_name}) &mdash; {part.result}</li>'
-                if part.ensemble_id:
-                    events_text += f'<li>{part.ensemble.name} (рук. {part.ensemble.teacher.short_name}) &mdash; {part.result}</li>'
-        events_text += '</ul>'
-    
-    return events_text + '</p>'
-
-def doc_process_tags(doc: Document, protocol: MethodAssemblyProtocol):
-    decisions = protocol.decisions.split(';')
-    for decision in decisions:
-        if '[события]' in decision:
-            # собрать все события на момент создания отчёта
-            doc_events_stats(doc)
-        if '[события:' in decision:
-            start_idx = 0
-            while True:
-                start_idx = decision.find('[события:', start_idx)
-                if start_idx == -1:
-                    break
-                    
-                end_idx = decision.find(']', start_idx + 2)
-                if end_idx == -1:
-                    break
-                    
-                full_tag = decision[start_idx:end_idx + 1]
-                params = full_tag.replace('[события:', '').replace(']', '').split(':')
-                
-                event_type = params[0] if params else 'все'  # концерты, конкурсы, все
-                term = int(params[1]) if len(params) > 1 and params[1].isdigit() else None
-                
-                doc = doc_events_stats(doc, event_type, term)
-                
-                start_idx = end_idx + 2
+        section = doc.sections[0]
+        section.left_margin = Cm(1)
+        section.right_margin = Cm(1)
+        section.top_margin = Cm(1)
+        section.bottom_margin = Cm(1)
         
-        if '[успеваемость:' in decision:
-            start_idx = 0
-            while True:
-                start_idx = decision.find('[успеваемость:', start_idx)
-                if start_idx == -1:
-                    break
+        title = doc.add_paragraph()
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        title.add_run(f'Протокол заседания методического объединения №{protocol.number} от {protocol.date.strftime("%d.%m.%Y")}').bold = True
+
+        attendees = doc.add_paragraph()
+        attendees.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        attendees.add_run('Присутствовали:\n').italic = True
+        attendees.add_run(protocol.attendees)
+
+        agenda_title = doc.add_paragraph()
+        agenda_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        agenda_title.add_run('Повестка:\n').bold = True
+
+        for i, item in enumerate(protocol.agenda.split('\r\n'), start=1):
+            doc.add_paragraph(f'{i}. {item}')
+
+        decisions = doc.add_paragraph()
+        decisions.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        decisions.add_run('Постановили:').bold = True
+
+        for i, decision in enumerate(protocol.decisions.split(';'), start=1):
+            # Находим все теги в решении
+            tags = re.findall(r'\[([^\]]+)\]', decision)
+            if not tags:
+                doc.add_paragraph(f'{i}. {decision}')
+                continue
+            
+            for tag in tags:
+                parsed_tag = parse_tag(f'[{tag}]')
+                
+                if not parsed_tag:
+                    doc.add_paragraph(f'{i}. {decision}')
+                    continue
                     
-                end_idx = decision.find(']', start_idx + 2)
-                if end_idx == -1:
-                    break
+                tag_type = parsed_tag['type']
+                
+                if tag_type == 'все_события':
+                    doc.add_paragraph(f'{i}. {remove_tags(decision)}')
+                    doc = doc_events(doc, 'все', None)
                     
-                full_tag = decision[start_idx:end_idx + 1]
-                params = full_tag.replace('[успеваемость:', '').replace(']', '').split(':')
-                params = [p.strip() for p in params]
-                if len(params) >= 1:
-                    term = int(params[0]) if params[0].isdigit() else None
-                    dep_name = params[1].replace('_', ' ').strip() if len(params) > 1 else 'все'
+                elif tag_type == 'события':
+                    if parsed_tag['event_type'].isdigit():
+                        event_type = 'все'
+                        term = int(parsed_tag['event_type'])
+                        doc.add_paragraph(f'{i}. {remove_tags(decision)}')
+                        doc = doc_events(doc, event_type, term)
+                    else:
+                        event_type = parsed_tag['event_type'] or 'все'
+                        term = int(parsed_tag['term']) if parsed_tag['term'] else None
+                        doc.add_paragraph(f'{i}. {remove_tags(decision)}')
+                        doc = doc_events(doc, event_type, term)
+                    
+                elif tag_type == 'успеваемость':
+                    if parsed_tag['dep_name'].isdigit():
+                        term = int(parsed_tag['dep_name'])
+                        dep_name = 'все'
+                    else:
+                        term = int(parsed_tag['term']) if parsed_tag['term'] else None
+                        dep_name = parsed_tag['dep_name'].replace('_', ' ').strip() if parsed_tag['dep_name'] else 'все'
                     
                     # Ищем отделение по названию
-                    dep = Department.query.filter((Department.title.ilike(f'%{dep_name}%'))).first()
-                    
-                    doc = doc_dep_report(doc, dep if dep else 'все', term)
-                else:
-                    doc = doc_dep_report(doc, 'все')
-                    
-                start_idx = end_idx + 2
+                    dep = Department.query.filter(
+                        Department.title.ilike(f'%{dep_name}%')
+                    ).first()
+                    if dep:
+                        doc.add_paragraph(f'{i}. {remove_tags(decision)}')
+                        doc = doc_dep_report(doc, dep, term)
+                    else:
+                        doc.add_paragraph(f'{i}. {remove_tags(decision)}')
+                        doc = doc_dep_report(doc, 'все', term)
 
-    return doc
+                elif tag_type == 'результаты':
+                    term = int(parsed_tag['term']) if parsed_tag['term'] else None
+                    exam_type = parsed_tag['exam_type'].replace('_', ' ').strip() if parsed_tag['exam_type'] else None
+                    doc.add_paragraph(f'{i}. {remove_tags(decision)}')
+                    print('Нашли тег с результатами:', parsed_tag)
+                    doc = doc_exams(doc, exam_type, term)
 
-def doc_events_stats(doc: Document, event_type='все', term=None):
+        file_stream = BytesIO()
+        doc.save(file_stream)
+        file_stream.seek(0)
+        return file_stream
+    
+    else:
+        print('Обрабатываем вывод на экран')
+        rendered_text = ''
+        for i, decision in enumerate(protocol.decisions.split(';'), start=1):
+            tags = re.findall(r'\[([^\]]+)\]', decision)
+            if not tags:
+                rendered_text += f'{i}. {decision}<br>'
+                continue
+            
+            for tag in tags:
+                parsed_tag = parse_tag(f'[{tag}]')
+                
+                if not parsed_tag:
+                    rendered_text += f'{i}. {decision}<br>'
+                    continue
+                    
+                tag_type = parsed_tag['type']
+                
+                if tag_type == 'все_события':
+                    print('Все события:', parsed_tag)
+                    rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    
+                elif tag_type == 'события':
+                    if parsed_tag['event_type'].isdigit():
+                        event_type = 'все'
+                        term = int(parsed_tag['event_type'])
+                        rendered_text += f'{i}. {remove_tags(decision)}'
+                    else:
+                        event_type = parsed_tag['event_type'] or 'все'
+                        term = int(parsed_tag['term']) if parsed_tag['term'] else None
+                        # doc = doc_events_stats(doc, event_type, term)
+                        rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    
+                elif tag_type == 'успеваемость':
+                    if parsed_tag['dep_name'].isdigit():
+                        term = int(parsed_tag['dep_name'])
+                        dep_name = 'все'
+                    else:
+                        term = int(parsed_tag['term']) if parsed_tag['term'] else None
+                        dep_name = parsed_tag['dep_name'].replace('_', ' ').strip() if parsed_tag['dep_name'] else 'все'
+                    
+                    # Ищем отделение по названию
+                    dep = Department.query.filter(
+                        Department.title.ilike(f'%{dep_name}%')
+                    ).first()
+                    
+                    if dep is not None:
+                        rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    else:
+                        rendered_text += f'{i}. {remove_tags(decision)}<br>'
+        
+        protocol.decisions = rendered_text
+        return protocol
+    
+def doc_events(doc: Document, event_type: str, term: int):
     academic_year = get_academic_year()
     event_types = {
         'концерты': [Concert.query],
@@ -877,19 +845,16 @@ def doc_events_stats(doc: Document, event_type='все', term=None):
         'все': [Concert.query, Contest.query]
     }
     events = []
-    if term is not None:
+    if term:
         for ev_type in event_types[event_type]:
             events.extend(ev_type.filter_by(term=term, academic_year=academic_year).all())
     else:
         for ev_type in event_types[event_type]:
             events.extend(ev_type.filter_by(academic_year=academic_year).all())
 
-    # if not events:
-    #     return '<p>Событий этого типа за указанный период не найдено</p><br>'
     for event in events:
-        events_text = doc.add_paragraph(f'{event.title} ({event.date.strftime("%d.%m.%Y")}, {event.place}). Принимали участие:\n')
+        events_text = doc.add_paragraph(f'● {event.title} ({event.date.strftime("%d.%m.%Y")}, {event.place}). Принимали участие:\n')
         if isinstance(event, Concert):
-            # events_text += f'Принимали участие: <br><ul>'
             for participation in event.participations:
                 if participation.student_id:
                     events_text.add_run(f'\t— {participation.student.short_name}, {participation.student.class_level}/{participation.student.study_years} (кл. преп.: {participation.student.lead_teacher.short_name})\n')
@@ -902,31 +867,29 @@ def doc_events_stats(doc: Document, event_type='все', term=None):
                 if part.ensemble_id:
                     events_text.add_run(f'{part.ensemble.name} (рук. {part.ensemble.teacher.short_name}) — {part.result}')
     
-    return events_text
+    return doc
 
-def doc_dep_report(doc: Document, dep: Department, term: int):
+def doc_dep_report(doc: Document, dep: Department='все', term: int=None):
     academic_year = get_academic_year()
-    if dep == 'все':
-        if term is not None:
-            reports = DepartmentReportItem.query.filter_by(term=term, academic_year=academic_year).all()
-        else:
-            reports = DepartmentReportItem.query.filter_by(academic_year=academic_year).all()
+    if isinstance(dep, str):
+        reports = DepartmentReportItem.query.filter_by(academic_year=academic_year, term=term).all()
     else:
-        if term is not None:
-            reports = DepartmentReportItem.query.filter_by(department_id=dep.id, term=term, academic_year=academic_year).all()
-        else:
-            reports = DepartmentReportItem.query.filter_by(department_id=dep.id, academic_year=academic_year).all()
+        reports = DepartmentReportItem.query.filter_by(academic_year=academic_year, term=term, department_id=dep.id).all()
 
     if not reports:
         return doc.add_paragraph('')
     
-    period = f'{term} четверть' if term in [1, 2, 3, 4] else f'{academic_year} учебный год'
     for report in reports:
         dep_title = doc.add_paragraph()
         dep_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
         dep_title.add_run(report.department.title.capitalize()).bold = True
         dep_details = doc.add_paragraph()
-        dep_details.add_run(f'Всего на отделении обучающихся: {len(report.department.students)}, из них {period} окончили:\n')
+        if report.term in [1, 2, 3, 4]:
+            dep_details.add_run(f'Всего на отделении обучающихся: {len(report.department.students)}, из них {term} четверть окончили:\n')
+        else:
+            dep_details.add_run(f'Результаты {academic_year} учебного года').italic = True
+            dep_details.add_run(f'\nВсего на отделении обучающихся: {len(report.department.students)}, из них учебный год окончили:\n')
+
         if report.got_best:
             dep_details.add_run(f'\t— отлично: {report.got_best}\n')
         if report.got_good:
@@ -937,26 +900,115 @@ def doc_dep_report(doc: Document, dep: Department, term: int):
             dep_details.add_run(f'\t— неудовлетворительно: {report.got_bad}\n')
         dep_details.add_run(f'Количественная успеваемость: {report.quantity}%\nКачественная успеваемость: {report.quality}%\n')
 
-        if term is not None:
-            exams = Exam.query.filter_by(department_id=report.department_id, term=term, academic_year=academic_year).all()
-        else:
-            exams = Exam.query.filter_by(department_id=report.department_id, academic_year=academic_year).all()
+        # exams = Exam.query.filter_by(department_id=report.department_id, term=term, academic_year=academic_year).all()
 
-        if exams:
-            for exam in exams:
-                exam_details = doc.add_paragraph()
-                exam_details.add_run(f'{exam.exam_type.name.capitalize()}, результаты\n').italic = True
-                exam_details.add_run(f'Всего сдавало обучающихся: {exam.total}, из этого количества:\n')
-                if exam.got_best:
-                    exam_details.add_run(f'\t— отлично: {exam.got_best}\n')
-                if exam.got_good:
-                    exam_details.add_run(f'\t— хорошо: {exam.got_good}\n')
-                if exam.got_avg:
-                    exam_details.add_run(f'\t— удовлетворительно: {exam.got_avg}\n')
-                if exam.got_bad:
-                    exam_details.add_run(f'\t— неудовлетворительно: {exam.got_bad}\n')
-                if exam.got_nothing:
-                    exam_details.add_run(f'\t— не сдавали: {exam.got_nothing}\n')
-            exam_details.add_run(f'Количественная успеваемость: {exam.quantity}%\nКачественная успеваемость: {exam.quality}\n')
-    
+        # if exams:
+        #     for exam in exams:
+        #         exam_details = doc.add_paragraph()
+        #         exam_details.add_run(f'{exam.exam_type.name.capitalize()}, результаты\n').italic = True
+        #         exam_details.add_run(f'Всего сдавало обучающихся: {exam.total}, из этого количества:\n')
+        #         if exam.got_best:
+        #             exam_details.add_run(f'\t— отлично: {exam.got_best}\n')
+        #         if exam.got_good:
+        #             exam_details.add_run(f'\t— хорошо: {exam.got_good}\n')
+        #         if exam.got_avg:
+        #             exam_details.add_run(f'\t— удовлетворительно: {exam.got_avg}\n')
+        #         if exam.got_bad:
+        #             exam_details.add_run(f'\t— неудовлетворительно: {exam.got_bad}\n')
+        #         if exam.got_nothing:
+        #             exam_details.add_run(f'\t— не сдавали: {exam.got_nothing}\n')
+        #     exam_details.add_run(f'Количественная успеваемость: {exam.quantity}%\nКачественная успеваемость: {exam.quality}%')
+
+        teachers = report.department.teachers
+        for teacher in teachers:
+            t_block = doc.add_paragraph()
+            t_block.add_run(f'Преподаватель: {teacher.short_name}').underline = True
+            s_reports = ReportItem.query.filter_by(academic_year=academic_year, term=term, teacher_id=teacher.id).all()
+            if not s_reports:
+                doc.add_paragraph('Отсутствуют отчёты по предметам!')
+            else:
+                for s_report in s_reports:
+                    s_r_block = doc.add_paragraph()
+                    s_r_block.add_run(f'Предмет "{s_report.subject.title}"').italic = True
+                    s_r_block.add_run(f'\nВсего обучающихся: {s_report.total}, из них:\n')
+                    if s_report.got_best:
+                        s_r_block.add_run(f'\t— отлично: {s_report.got_best}\n')
+                    if s_report.got_good:
+                        s_r_block.add_run(f'\t— хорошо: {s_report.got_good}\n')
+                    if s_report.got_avg:
+                        s_r_block.add_run(f'\t— удовлетворительно: {s_report.got_avg}\n')
+                    if s_report.got_bad:
+                        s_r_block.add_run(f'\t— неудовлетворительно: {s_report.got_bad}\n')
+                    s_r_block.add_run(f'Количественная успеваемость: {s_report.quantity}%\nКачественная успеваемость: {s_report.quality}%\n')
+            
+            c_reports = ClassReportItem.query.filter_by(academic_year=academic_year, term=term, teacher_id=teacher.id).all()
+            if c_reports:
+                for c_report in c_reports:
+                    c_r_block = doc.add_paragraph()
+                    if c_report.term in [1, 2, 3, 4]:
+                        # c_r_block.add_run(f'\tРезультаты {c_report.term} четверти')
+                        c_r_block.add_run(f'Обучающихся в классе преподавателя: {c_report.total}, из них {c_report.term} четверть окончили:\n')
+                    else:
+                        c_r_block.add_run(f'Результаты {academic_year} учебного года\n').italic = True
+                        c_r_block.add_run(f'Обучающихся в классе преподавателя: {c_report.total}, из них:\n')
+                    if c_report.got_best:
+                        c_r_block.add_run(f'\t— отлично: {c_report.got_best}\n')
+                    if c_report.got_good:
+                        c_r_block.add_run(f'\t— хорошо: {c_report.got_good}\n')
+                    if c_report.got_avg:
+                        c_r_block.add_run(f'\t— удовлетворительно: {c_report.got_avg}\n')
+                    if c_report.got_bad:
+                        c_r_block.add_run(f'\t— неудовлетворительно: {c_report.got_bad}\n')
+                    c_r_block.add_run(f'Количественная успеваемость: {c_report.quantity}%\nКачественная успеваемость: {c_report.quality}%\n')
+    if dep == 'все':
+        for teacher in Teacher.query.filter_by(main_department_id=0).all():
+            print('Есть преподаватели без отделения')
+            nd_teacher = doc.add_paragraph()
+            nd_teacher.add_run(f'Преподаватель: {teacher.short_name}').underline = True
+            # nd_teacher.add_run(f'Всего обучающихся: {Student.query.filter_by(status_id=1).count()}')
+            reports = ReportItem.query.filter_by(teacher_id=teacher.id, term=term).all()
+            if reports:
+                for report in reports:
+                    s_block = doc.add_paragraph()
+                    s_block.add_run(f'Предмет "{report.subject.title}"').italic = True
+                    if report.term in [1, 2, 3, 4]:
+                        s_block.add_run(f'\nРезультаты {report.term} четверти\n').italic = True
+                    else:
+                        s_block.add_run(f'\nРезультаты {academic_year} учебного года\n').italic = True
+                    s_block.add_run(f'Всего обучающихся: {report.total}, из них:\n')
+                    if report.got_best:
+                        s_block.add_run(f'\t— отлично: {report.got_best}\n')
+                    if report.got_good:
+                        s_block.add_run(f'\t— хорошо: {report.got_good}\n')
+                    if report.got_avg:
+                        s_block.add_run(f'\t— удовлетворительно: {report.got_avg}\n')
+                    if report.got_bad:
+                        s_block.add_run(f'\t— неудовлетворительно: {report.got_bad}\n')
+                    s_block.add_run(f'Количественная успеваемость: {report.quantity}%\nКачественная успеваемость: {report.quality}%\n')
+    return doc
+
+def doc_exams(doc: Document, exam_type: str, term: int=None):
+    e_types = [et.id for et in ExamType.query.filter(ExamType.name.ilike(f'%{exam_type}%')).all()]
+    query = Exam.query.filter(Exam.exam_type_id.in_(e_types))
+    if term is not None:
+        query = query.filter(Exam.term == term)
+    exams = query.all()
+
+    if exams:
+        for exam in exams:
+            exam_block = doc.add_paragraph()
+            exam_block.add_run(f'{exam.exam_type.name.capitalize()}, результаты').italic = True
+            exam_block.add_run(f'\nВсего сдавало обучающихся: {exam.total}, из них:\n')
+            if exam.got_best:
+                exam_block.add_run(f'\t— отлично: {exam.got_best}\n')
+            if exam.got_good:
+                exam_block.add_run(f'\t— хорошо: {exam.got_good}\n')
+            if exam.got_avg:
+                exam_block.add_run(f'\t— удовлетворительно: {exam.got_avg}\n')
+            if exam.got_bad:
+                exam_block.add_run(f'\t— неудовлетворительно: {exam.got_bad}\n')
+            if exam.got_nothing:
+                exam_block.add_run(f'\t— не сдавало: {exam.got_nothing}\n')
+            exam_block.add_run(f'Количественная успеваемость: {exam.quantity}%\nКачественная успеваемость: {exam.quality}%')
+            
     return doc

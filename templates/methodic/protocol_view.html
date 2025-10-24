@@ -41,7 +41,7 @@
 <p class="uk-margin-left">
     {% for decision in protocol.decisions.split(';') %}
     {% if decision != '' %}
-    {{loop.index}}. {{ decision.replace('\n\t', '<br>&emsp; ')|safe }}<br>
+    {{ decision.replace('\n\t', '<br>&emsp; ')|safe }}<br>
     {% endif %}
     {% endfor %}
 </p>
