@@ -38,12 +38,10 @@
     {% endfor %}
 </p>
 <h3>Постановили</h3>
-<p class="uk-margin-left">
+
     {% for decision in protocol.decisions.split(';') %}
-    {% if decision != '' %}
-    {{ decision.replace('\n\t', '<br>&emsp; ')|safe }}<br>
-    {% endif %}
+    {{ decision|safe }}<br>
     {% endfor %}
-</p>
+
 
 {% endblock %}

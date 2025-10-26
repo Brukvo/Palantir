@@ -16,7 +16,7 @@
             </tr>
             <tr>
                 <th>Отделение</th>
-                <th>Программа</th>
+                <th>Преподаватели</th>
                 <th>Уч</th>
                 <th class="uk-text-center">I</th>
                 <th class="uk-text-center">II</th>
@@ -28,7 +28,11 @@
             {% for dep in deps %}
             <tr>
                 <td><a href="{{ url_for('departments.view', id=dep.id) }}">{{ dep.title.capitalize() }}</a></td>
-                <td>{{ dep.short_name }}</td>
+                <td>
+                    {% for teacher in dep.teachers %}
+                    <a href="{{ url_for('teachers.view', id=teacher.id) }}">{{ teacher.short_name }}</a><br>
+                    {% endfor %}
+                </td>
                 <td>{{ dep.active_count }}</td>
                 <td class="uk-text-center uk-text-{% if dep_reports[dep.id][0] %}success{% else %}warning{% endif %}">●</td>
                 <td class="uk-text-center uk-text-{% if dep_reports[dep.id][1] %}success{% else %}warning{% endif %}">●</td>

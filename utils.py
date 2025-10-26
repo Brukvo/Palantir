@@ -637,11 +637,11 @@ def method_report(term, doc: Document):
     if t_courses:
         doc_t_courses = doc.add_paragraph('— Курсы повышения квалификации: \n')
         for course in t_courses:
-            doc_t_courses.add_run(f'\t⏺ {course.teacher.short_name}: {course.title} ({course.place}), {course.hours}ч, {course.start_date.strftime("%d.%m.%Y")}-{course.end_date.strftime("%d.%m.%Y")}\n')
+            doc_t_courses.add_run(f'\t⦁ {course.teacher.short_name}: {course.title} ({course.place}), {course.hours}ч, {course.start_date.strftime("%d.%m.%Y")}-{course.end_date.strftime("%d.%m.%Y")}\n')
     if r_courses:
             doc_r_courses = doc.add_paragraph('— Курсы профессиональной переподготовки: \n')
             for course in r_courses:
-                doc_r_courses.add_run(f'\t⏺ {course.teacher.short_name}: {course.title} ({course.place}), {course.hours}ч, {course.start_date.strftime("%d.%m.%Y")}-{course.end_date.strftime("%d.%m.%Y")}\n')
+                doc_r_courses.add_run(f'\t⦁ {course.teacher.short_name}: {course.title} ({course.place}), {course.hours}ч, {course.start_date.strftime("%d.%m.%Y")}-{course.end_date.strftime("%d.%m.%Y")}\n')
 
     concert_work = doc.add_paragraph()
     concert_work.add_run('Внеклассная работа').underline = True
@@ -660,12 +660,12 @@ def method_report(term, doc: Document):
             doc_contest = doc.add_paragraph(f'— {contest.title} ({contest.place}):\n')
             for part in contest.participations:
                 if part.student_id is not None:
-                    doc_contest.add_run(f'⏺ {part.student.short_name} (кл. преп. {part.student.lead_teacher.short_name}): {part.result}\n')
+                    doc_contest.add_run(f'⦁ {part.student.short_name}, {part.student.class_level}/{part.student.study_years} (кл. преп. {part.student.lead_teacher.short_name}): {part.result}\n')
                 else:
                     members_list = []
                     for member in part.ensemble.members:
                         members_list.append(member.student.short_name)
-                    doc_contest.add_run(f'⏺ {part.ensemble.name} ({", ".join(members_list)}; рук. {part.ensemble.teacher.short_name}): {part.result}')
+                    doc_contest.add_run(f'⦁ {part.ensemble.name} ({", ".join(members_list)}; рук. {part.ensemble.teacher.short_name}): {part.result}')
 
     return doc
 
@@ -691,7 +691,6 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
         protocol.decisions = protocol.decisions.replace(tag, replacement)
 
     if to_doc:
-        print('Обрабатываем вывод в документ')
         doc = set_font(Document(), 'PT Serif', 14)
         
         section = doc.sections[0]
@@ -772,10 +771,10 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
                         doc = doc_dep_report(doc, 'все', term)
 
                 elif tag_type == 'результаты':
+                    print('Тег с результатами:', parsed_tag)
                     term = int(parsed_tag['term']) if parsed_tag['term'] else None
                     exam_type = parsed_tag['exam_type'].replace('_', ' ').strip() if parsed_tag['exam_type'] else None
                     doc.add_paragraph(f'{i}. {remove_tags(decision)}')
-                    print('Нашли тег с результатами:', parsed_tag)
                     doc = doc_exams(doc, exam_type, term)
 
         file_stream = BytesIO()
@@ -784,12 +783,11 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
         return file_stream
     
     else:
-        print('Обрабатываем вывод на экран')
         rendered_text = ''
         for i, decision in enumerate(protocol.decisions.split(';'), start=1):
             tags = re.findall(r'\[([^\]]+)\]', decision)
             if not tags:
-                rendered_text += f'{i}. {decision}<br>'
+                rendered_text += f'\t{i}. {decision}<br>'
                 continue
             
             for tag in tags:
@@ -802,7 +800,6 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
                 tag_type = parsed_tag['type']
                 
                 if tag_type == 'все_события':
-                    print('Все события:', parsed_tag)
                     rendered_text += f'{i}. {remove_tags(decision)}<br>'
                     rendered_text += html_events('все', None)
                     
@@ -832,6 +829,18 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
                     
                     rendered_text += f'{i}. {remove_tags(decision)}<br>'
                     rendered_text += html_dep_report(dep if dep else 'все', term)
+
+                elif tag_type == 'результаты':
+                    print('Тег с результатами:', parsed_tag)
+                    if parsed_tag['exam_type'].isdigit():
+                        term = parsed_tag['exam_type']
+                        exam_type = None
+                    else:
+                        term = int(parsed_tag['term']) if parsed_tag['term'] else None
+                        exam_type = parsed_tag['exam_type'].replace('_', ' ').strip() if parsed_tag['exam_type'] else None
+                    print(f'Тип экзамена: {exam_type}, период: {term}')
+                    rendered_text += f'{i}. {remove_tags(decision)}'
+                    rendered_text += html_exams(exam_type, term)
         
         protocol.decisions = rendered_text
         return protocol
@@ -961,7 +970,6 @@ def doc_dep_report(doc: Document, dep: Department='все', term: int=None):
                     c_r_block.add_run(f'Количественная успеваемость: {c_report.quantity}%\nКачественная успеваемость: {c_report.quality}%\n')
     if dep == 'все':
         for teacher in Teacher.query.filter_by(main_department_id=0).all():
-            print('Есть преподаватели без отделения')
             nd_teacher = doc.add_paragraph()
             nd_teacher.add_run(f'Преподаватель: {teacher.short_name}').underline = True
             # nd_teacher.add_run(f'Всего обучающихся: {Student.query.filter_by(status_id=1).count()}')
@@ -1136,20 +1144,30 @@ def html_dep_report(dep: Department='все', term: int=None):
                         text += f'<li>— неудовлетворительно: {report.got_bad}</li>'
                     text += f'</ul>Количественная успеваемость: {report.quantity}%<br>Качественная успеваемость: {report.quality}%<br><br>'
             else:
-                text += 'Нет отчётов по преподаваемым предметам!<br>'
+                text += 'Нет отчётов по преподаваемым предметам!<br><br>'
     return text
 
 def html_exams(exam_type: str, term: int=None):
-    e_types = [et.id for et in ExamType.query.filter(ExamType.name.ilike(f'%{exam_type}%')).all()]
-    query = Exam.query.filter(Exam.exam_type_id.in_(e_types))
+    academic_year = get_academic_year()
+    query = Exam.query
+    et_query = ExamType.query
+
+    if exam_type is not None:
+        et_query = et_query.filter(ExamType.name.ilike(f'%{exam_type}%'))
+    
+    e_types = [et.id for et in et_query.all()]
+
     if term is not None:
-        query = query.filter(Exam.term == term)
+        query = query.filter(Exam.term == term, Exam.academic_year == academic_year, Exam.exam_type_id.in_(e_types))
+    else:
+        query = query.filter(Exam.academic_year == academic_year, Exam.exam_type_id.in_(e_types))
+
     exams = query.all()
 
     text = ''
     if exams:
         for exam in exams:
-            text += f'<span class="uk-text-italic">{exam.exam_type.name.capitalize()}, результаты</span><br>Всего сдавало обучающихся: {exam.total}, из них:<ul class="uk-margin-remove">'
+            text += f'<br><span class="uk-text-italic">{exam.exam_type.name.capitalize()}, результаты</span><br>Всего сдавало обучающихся: {exam.total}, из них:<ul class="uk-margin-remove">'
             if exam.got_best:
                 text += f'<li>отлично: {exam.got_best}</li>'
             if exam.got_good:
@@ -1160,6 +1178,6 @@ def html_exams(exam_type: str, term: int=None):
                 text += f'<li>неудовлетворительно: {exam.got_bad}</li>'
             if exam.got_nothing:
                 text += f'<li>не сдавало: {exam.got_nothing}</li>'
-            text += f'Количественная успеваемость: {exam.quantity}%<br>Качественная успеваемость: {exam.quality}%'
+            text += f'</ul>Количественная успеваемость: {exam.quantity}%<br>Качественная успеваемость: {exam.quality}%<br>'
             
     return text
