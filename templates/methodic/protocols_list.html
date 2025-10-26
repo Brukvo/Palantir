@@ -34,8 +34,9 @@
         <td>{% if a.protocol_file %}<a href="{{url_for('method.protocol_retrieve', id=a.id)}}">скачать</a>{% else %}отсутствует{% endif %}</td>
         <td>
             <a href="{{ url_for('method.protocol_view', id=a.id) }}" class="uk-icon-button uk-text-secondary" uk-icon="eye" uk-tooltip="title: Просмотреть протокол; pos: bottom"></a>
+            <a href="{{ url_for('method.protocol_edit', id=a.id) }}" class="uk-icon-button uk-text-secondary" uk-icon="pencil" uk-tooltip="title: Изменить протокол; pos: bottom"></a>
             {#{% if not a.protocol_file %}<a href="#" class="uk-icon-button uk-text-primary" uk-icon="upload" uk-tooltip="title: Загрузить протокол; pos: bottom"></a>{% endif %}#}
-            <a href="#" class="uk-icon-button uk-text-danger" uk-icon="trash" uk-tooltip="title: Удалить протокол; pos: bottom"></a>
+            <a href="{{ url_for('method.protocol_delete', id=a.id) }}" class="uk-icon-button uk-text-danger" uk-icon="trash" uk-tooltip="title: Удалить протокол; pos: bottom"></a>
         </td>
     </tr>
     {% endfor %}

@@ -17,7 +17,7 @@
     </tr>
     {% for et in exam_types %}
     <tr>
-        <td>{{ et.name }}</td>
+        <td><a href="{{ url_for('settings.attest_view', id=et.id)}}">{{ et.name }}</a></td>
         <td>{{ et.exam_type|count }}</td>
         <td>
             <a href="#" class="uk-icon-button" uk-icon="pencil" uk-tooltip="title: Редактировать; pos: bottom"></a>

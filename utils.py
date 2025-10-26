@@ -772,8 +772,12 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
 
                 elif tag_type == 'результаты':
                     print('Тег с результатами:', parsed_tag)
-                    term = int(parsed_tag['term']) if parsed_tag['term'] else None
-                    exam_type = parsed_tag['exam_type'].replace('_', ' ').strip() if parsed_tag['exam_type'] else None
+                    if parsed_tag['exam_type'].isdigit():
+                        term = int(parsed_tag['exam_type'])
+                        exam_type = parsed_tag['term'].replace('_', ' ').strip() if parsed_tag['term'] else None
+                    else:
+                        term = int(parsed_tag['term']) if parsed_tag['term'] else None
+                        exam_type = parsed_tag['exam_type'].replace('_', ' ').strip() if parsed_tag['exam_type'] else None
                     doc.add_paragraph(f'{i}. {remove_tags(decision)}')
                     doc = doc_exams(doc, exam_type, term)
 
@@ -995,10 +999,20 @@ def doc_dep_report(doc: Document, dep: Department='все', term: int=None):
     return doc
 
 def doc_exams(doc: Document, exam_type: str, term: int=None):
-    e_types = [et.id for et in ExamType.query.filter(ExamType.name.ilike(f'%{exam_type}%')).all()]
-    query = Exam.query.filter(Exam.exam_type_id.in_(e_types))
+    academic_year = get_academic_year()
+    query = Exam.query
+    et_query = ExamType.query
+
+    if exam_type is not None:
+        et_query = et_query.filter(ExamType.name.ilike(f'%{exam_type}%'))
+    
+    e_types = [et.id for et in et_query.all()]
+
     if term is not None:
-        query = query.filter(Exam.term == term)
+        query = query.filter(Exam.term == term, Exam.academic_year == academic_year, Exam.exam_type_id.in_(e_types))
+    else:
+        query = query.filter(Exam.academic_year == academic_year, Exam.exam_type_id.in_(e_types))
+    
     exams = query.all()
 
     if exams:

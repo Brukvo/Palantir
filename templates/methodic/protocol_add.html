@@ -4,7 +4,11 @@
 
 {% block content %}
 <h2>{{title}}</h2>
+{% if action == 'add' %}
 <form action="{{ url_for('method.protocols_add') }}" method="post" enctype="multipart/form-data">
+    {% else %}    
+<form action="{{ url_for('method.protocol_edit', id=protocol.id) }}" method="post" enctype="multipart/form-data">
+{% endif %}
     {{ form.csrf_token }}
     <div class="uk-margin">
         <div class="uk-form-controls">
@@ -37,7 +41,7 @@
                 <label class="uk-form-label">Период</label>
                 <div class="uk-form-controls">
                     <input name="term" id="term"
-                        value="{% if term in [1, 2, 3, 4] %}{{ term }} четверть {% else %}Год{% endif %}" disabled
+                        value="{% if action=='add' %}{% if term in [1, 2, 3, 4] %}{{ term }} четверть {% else %}Год{% endif %}{% else %}{{protocol.term}}{% endif %}" disabled
                         class="uk-input uk-border-rounded">
                 </div>
             </div>

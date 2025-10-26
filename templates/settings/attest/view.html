@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}{{title}} / {{super()}}{% endblock %}
+
+{% block content %}
+<h2>{{title|safe}}&ensp;<span class="uk-text-muted">{{ et }}</span></h2>
+<table class="uk-table">
+    <tr>
+        <th>Учебный год</th>
+        <th>Период</th>
+        <th>Дата</th>
+        <th>Отделение</th>
+        <th>№</th>
+        <th></th>
+    </tr>
+    {% for exam in exams %}
+    <tr>
+        <td>{{exam.academic_year}}</td>
+        <td>{{exam.term}} ч.</td>
+        <td>{{exam.date.strftime("%d.%m.%Y")}}</td>
+        <td>{{exam.department.title}}</td>
+        <td>{{ exam.id }}</td>
+        <td><a href="{{ url_for('exams.exam_detail', id=exam.id) }}" class="uk-icon-button" uk-icon="eye"></a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

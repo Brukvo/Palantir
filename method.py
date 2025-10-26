@@ -51,14 +51,36 @@ def protocols_add():
     else:
         print(form.errors)
         
-    return render_template('methodic/protocol_add.html', form=form, title='Добавление протокола методического заседания', term=get_term(), academic_year=get_academic_year(), methodist=school.methodist.short_name)
+    return render_template('methodic/protocol_add.html', form=form, title='Добавление протокола методического заседания', term=get_term(), academic_year=get_academic_year(), methodist=school.methodist.short_name, action='add')
 
 @bp.get('/protocol/<int:id>/view')
 def protocol_view(id):
     protocol = MethodAssemblyProtocol.query.get_or_404(id)
     protocol = render_protocol(protocol)
     form = MethodProtocolUploadForm()
-    return render_template('methodic/protocol_view.html', protocol=protocol, title=f'Протокол заседания методического объединения №{protocol.number} от {protocol.date.strftime("%d.%m.%Y")}', form=form)
+    return render_template('methodic/protocol_view.html', protocol=protocol, title=f'Протокол заседания методического объединения №{protocol.number} от {protocol.date.strftime("%d.%m.%Y")}', form=form, action='add')
+
+@bp.route('/protocol/<int:id>/edit', methods=['GET', 'POST'])
+def protocol_edit(id):
+    protocol = MethodAssemblyProtocol.query.get_or_404(id)
+    protocol_file = protocol.protocol_file
+    form = MethodProtocolForm(obj=protocol)
+    school = School.query.first()
+    if school is None:
+        flash('Не заполнены сведения о школе', 'warning')
+        return redirect(url_for('settings.all'))
+
+    if form.validate_on_submit():
+        form.populate_obj(protocol)
+        protocol.term = get_term(form.date.data)
+        protocol.academic_year = get_academic_year(form.date.data)
+        protocol.protocol_file = protocol_file
+        db.session.commit()
+        flash('Протокол обновлён', 'success')
+        return redirect(url_for('method.protocol_view', id=protocol.id))
+    
+    return render_template('methodic/protocol_add.html', action='edit', title='Редактирование протокола заседания', form=form, protocol=protocol, methodist=school.methodist.short_name, term=get_term(protocol.date), academic_year=get_academic_year(protocol.date))
+
 
 @bp.route('/protocol/<int:id>/upload', methods=['GET', 'POST'])
 def protocol_upload(id):

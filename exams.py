@@ -226,7 +226,7 @@ def protocol(id):
     }
 
     file_stream = generate_protocol(exam, exam_items, props)
-    filename = f"Протокол_{exam.id}_{exam.date}.docx"
+    filename = f"Протокол_{exam.id}_{exam.discipline.replace(' ', '_')}_-_{exam.exam_type.name.replace(' ', '_')}_{exam.date.strftime('%d-%m-%Y')}.docx"
     return send_file(
         file_stream,
         as_attachment=True,

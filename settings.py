@@ -3,7 +3,7 @@ from models import db, Department, Teacher, Student, Ensemble, EnsembleMember, C
 from forms import ExamTypeForm, SubjectAddForm, SubjectEditForm, SchoolForm
 from sqlalchemy import desc, text
 from sqlalchemy.exc import IntegrityError, MultipleResultsFound
-from utils import get_db_version
+from utils import get_db_version, get_academic_year
 
 bp = Blueprint('settings', __name__, url_prefix='/settings')
 
@@ -59,6 +59,12 @@ def attest_add():
     
     return render_template('settings/attest/add.html', form=form, title='Добавление вида аттестации')
 
+@bp.route('/attest/<int:id>/view')
+def attest_view(id):
+    et = ExamType.query.get_or_404(id)
+    exams = Exam.query.filter_by(exam_type_id=et.id, academic_year=get_academic_year()).all()
+    return render_template('settings/attest/view.html', exams=exams, et=et.name, title='Все протоколы')
+
 @bp.route('/attest/<int:id>/delete')
 def attest_delete(id):
     et = ExamType.query.get_or_404(id)
@@ -68,6 +74,7 @@ def attest_delete(id):
         flash(f'Тип аттестации <b>{et.name}</b> успешно удалён', 'success')
         return redirect(url_for('settings.attest_list'))
     except IntegrityError:
+        db.sesion.rollback()
         flash('Есть протоколы с этим видом аттестации. Сначала удалите протоколы, затем повторите удаление вида аттестации', 'warning')
         return redirect('exams.all')
 
