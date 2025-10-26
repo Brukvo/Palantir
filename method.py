@@ -21,6 +21,19 @@ def protocols_add():
     form = MethodProtocolForm()
     school = School.query.first()
 
+    tags = {
+        '[дата]': 'Дата в формате ДД.ММ.ГГГГ, например, <code>31.08.2025</code>',
+        '[учебный_год]': 'Текущий учебный год, например, <code>2025-2026</code>',
+        '[успеваемость:1]': 'Результаты успеваемости всех отделений, преподавателей этих отделений, а также преподавателей музыкально-теоретических дисциплин за 1 четверть. Число можно заменить на соответствующую четверть.',
+        '[успеваемость:3:фортепиано]': 'Результаты успеваемости отделения "фортепиано" и преподавателей отделения за 3 четверть. Для вывода отчёта по успеваемости по другому отделению введите его название или часть, используя вместо пробела символ подчёркивания <code>_</code>',
+        '[результаты:1]': 'Результаты <b>всех</b> зачётов и экзаменов на всех отделениях за 1 четверть. Измените цифру, чтобы получить данные за любой другой период. Если поставить 5, будет результат за учебный год',
+        '[результаты:2:академ]': 'Результаты академических концертов на всех отделениях за 2 четверть. Для вывода результата по другому виду аттестации используйте название этого вида или его часть, используя символ подчёркивания <code>_</code> вместо пробела',
+        '[все_события]': 'Все зафиксированные в системе мероприятия (концерты и конкурсы) за весь учебный год вместе с их участниками',
+        '[события:1]': 'Все мероприятия (концерты и конкурсы), прошедшие в 1 четверти',
+        '[события:конкурсы]': 'Результаты конкурсов за весь учебный год',
+        '[события:концерты:4]': 'Все концерты в 4 четверти',
+    }
+
     if form.validate_on_submit():
         try:
             last_protocol = MethodAssemblyProtocol.query.filter_by(academic_year=get_academic_year()).order_by(MethodAssemblyProtocol.number.desc()).first()
@@ -50,8 +63,9 @@ def protocols_add():
             return redirect('/')
     else:
         print(form.errors)
-        
-    return render_template('methodic/protocol_add.html', form=form, title='Добавление протокола методического заседания', term=get_term(), academic_year=get_academic_year(), methodist=school.methodist.short_name, action='add')
+    
+    term = f'{get_term()} четверть' if get_term() in [1, 2, 3, 4] else 'год'
+    return render_template('methodic/protocol_add.html', form=form, title='Добавление протокола методического заседания', term=term, academic_year=get_academic_year(), methodist=school.methodist.short_name, action='add', tags=tags)
 
 @bp.get('/protocol/<int:id>/view')
 def protocol_view(id):
@@ -66,6 +80,20 @@ def protocol_edit(id):
     protocol_file = protocol.protocol_file
     form = MethodProtocolForm(obj=protocol)
     school = School.query.first()
+
+    tags = {
+        '[дата]': 'Дата в формате ДД.ММ.ГГГГ, например, <code>31.08.2025</code>',
+        '[учебный_год]': 'Текущий учебный год, например, <code>2025-2026</code>',
+        '[успеваемость:1]': 'Результаты успеваемости всех отделений, преподавателей этих отделений, а также преподавателей музыкально-теоретических дисциплин за 1 четверть. Число можно заменить на соответствующую четверть.',
+        '[успеваемость:3:фортепиано]': 'Результаты успеваемости отделения "фортепиано" и преподавателей отделения за 3 четверть. Для вывода отчёта по успеваемости по другому отделению введите его название или часть, используя вместо пробела символ подчёркивания <code>_</code>',
+        '[результаты:1]': 'Результаты <b>всех</b> зачётов и экзаменов на всех отделениях за 1 четверть. Измените цифру, чтобы получить данные за любой другой период. Если поставить 5, будет результат за учебный год',
+        '[результаты:2:академ]': 'Результаты академических концертов на всех отделениях за 2 четверть. Для вывода результата по другому виду аттестации используйте название этого вида или его часть, используя символ подчёркивания <code>_</code> вместо пробела',
+        '[все_события]': 'Все зафиксированные в системе мероприятия (концерты и конкурсы) за весь учебный год вместе с их участниками',
+        '[события:1]': 'Все мероприятия (концерты и конкурсы), прошедшие в 1 четверти',
+        '[события:конкурсы]': 'Результаты конкурсов за весь учебный год',
+        '[события:концерты:4]': 'Все концерты в 4 четверти',
+    }
+
     if school is None:
         flash('Не заполнены сведения о школе', 'warning')
         return redirect(url_for('settings.all'))
@@ -78,8 +106,9 @@ def protocol_edit(id):
         db.session.commit()
         flash('Протокол обновлён', 'success')
         return redirect(url_for('method.protocol_view', id=protocol.id))
-    
-    return render_template('methodic/protocol_add.html', action='edit', title='Редактирование протокола заседания', form=form, protocol=protocol, methodist=school.methodist.short_name, term=get_term(protocol.date), academic_year=get_academic_year(protocol.date))
+
+    term = f'{get_term(protocol.date)} четверть' if get_term(protocol.date) in [1, 2, 3, 4] else 'год'
+    return render_template('methodic/protocol_add.html', action='edit', title='Редактирование протокола заседания', form=form, protocol=protocol, methodist=school.methodist.short_name, term=term, academic_year=get_academic_year(protocol.date), tags=tags)
 
 
 @bp.route('/protocol/<int:id>/upload', methods=['GET', 'POST'])

@@ -6,86 +6,148 @@
 <h2>{{title}}</h2>
 {% if action == 'add' %}
 <form action="{{ url_for('method.protocols_add') }}" method="post" enctype="multipart/form-data">
-    {% else %}    
-<form action="{{ url_for('method.protocol_edit', id=protocol.id) }}" method="post" enctype="multipart/form-data">
-{% endif %}
-    {{ form.csrf_token }}
-    <div class="uk-margin">
-        <div class="uk-form-controls">
-            {{ form.title(class='uk-input uk-form-large uk-border-rounded', placeholder=form.title.label|striptags) }}
-            {% if form.title.description %}<span class="uk-text-small uk-text-muted">{{ form.title.description }}</span>{% endif
-            %}
+    {% else %}
+    <form action="{{ url_for('method.protocol_edit', id=protocol.id) }}" method="post" enctype="multipart/form-data">
+        {% endif %}
+        {{ form.csrf_token }}
+        <div class="uk-margin">
+            <div class="uk-form-controls">
+                {{ form.title(class='uk-input uk-form-large uk-border-rounded', placeholder=form.title.label|striptags)
+                }}
+                {% if form.title.description %}<span class="uk-text-small uk-text-muted">{{ form.title.description
+                    }}</span>{% endif
+                %}
+            </div>
         </div>
-    </div>
-    <div class="uk-child-width-1-4" uk-grid>
-        <div>
-            <div class="uk-margin">
-                <label class="uk-form-label">{{ form.date.label }}</label>
-                <div class="uk-form-controls">
-                    {{ form.date(class='uk-input uk-border-rounded') }}
+        <div class="uk-child-width-1-4" uk-grid>
+            <div>
+                <div class="uk-margin">
+                    <label class="uk-form-label">{{ form.date.label }}</label>
+                    <div class="uk-form-controls">
+                        {{ form.date(class='uk-input uk-border-rounded') }}
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="uk-margin">
+                    <label class="uk-form-label">Учебный год</label>
+                    <div class="uk-form-controls">
+                        <input type="text" value="{{academic_year}}" disabled class="uk-input uk-border-rounded">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="uk-margin">
+                    <label class="uk-form-label">Период</label>
+                    <div class="uk-form-controls">
+                        <input name="term" id="term"
+                            value="{{term}}"
+                            disabled class="uk-input uk-border-rounded">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="uk-margin">
+                    <label class="uk-form-label">Ответственный</label>
+                    <div class="uk-form-controls">
+                        <input type="text" class="uk-input uk-border-rounded" value="{{methodist}}" disabled>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div>
-            <div class="uk-margin">
-                <label class="uk-form-label">Учебный год</label>
-                <div class="uk-form-controls">
-                    <input type="text" value="{{academic_year}}" disabled class="uk-input uk-border-rounded">
-                </div>
+        <div class="uk-margin">
+            <label class="uk-form-label">{{ form.agenda.label }}</label>
+            <div class="uk-form-controls">
+                {{ form.agenda(class='uk-textarea uk-border-rounded', rows=5) }}
+                <span class="uk-text-small uk-text-muted">Для разделения пунктов повестки нажимайте клавишу <code>Enter</code></span>
             </div>
         </div>
 
-        <div>
-            <div class="uk-margin">
-                <label class="uk-form-label">Период</label>
-                <div class="uk-form-controls">
-                    <input name="term" id="term"
-                        value="{% if action=='add' %}{% if term in [1, 2, 3, 4] %}{{ term }} четверть {% else %}Год{% endif %}{% else %}{{protocol.term}}{% endif %}" disabled
-                        class="uk-input uk-border-rounded">
-                </div>
+        <div class="uk-margin">
+            <label class="uk-form-label">{{ form.decisions.label }}</label>
+            <div class="uk-form-controls">
+                {{ form.decisions(class='uk-textarea uk-border-rounded', rows=8) }}
+                <span class="uk-text-small uk-text-muted">Используйте точку с запятой <code>;</code> для разделения пунктов между собой</span>
             </div>
         </div>
-
-        <div>
-            <div class="uk-margin">
-                <label class="uk-form-label">Ответственный</label>
-                <div class="uk-form-controls">
-                    <input type="text" class="uk-input uk-border-rounded" value="{{methodist}}" disabled>
-                </div>
+        <p class="uk-text-center">Для того, чтобы вставить тег, поместите курсор в нужную позицию и нажмите нужный тег.
+            Если Вам нужны другие значения, просто замените их в тексте решений.</p>
+        <table class="uk-table">
+            <tr>
+                <th>Тег</th>
+                <th>Описание</th>
+            </tr>
+            {% for tag in tags %}
+            <tr>
+                <td class="uk-width-1-6"><a class="tag-btn" data-tag="{{tag}}">{{tag}}</a></td>
+                <td>{{tags[tag]|safe}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div class="uk-margin">
+            <label class="uk-form-label">{{ form.protocol_file.label }}:</label>
+            <div uk-form-custom>
+                &ensp;{{ form.protocol_file(class='uk-file uk-border-rounded') }}
+                <button class="uk-button uk-button-default uk-border-rounded" type="button" tabindex="-1">Выбрать файл
+                    протокола</button>
             </div>
+            <span class="uk-text-small uk-text-muted">Воспользуйтесь этим полем, если у Вас уже есть готовый файл протокола. Принимаются файлы форматов <code>DOC</code>, <code>DOCX</code>, <code>PDF</code></span>
         </div>
-    </div>
 
-    <div class="uk-margin">
-        <label class="uk-form-label">{{ form.agenda.label }}</label>
-        <div class="uk-form-controls">
-            {{ form.agenda(class='uk-textarea uk-border-rounded', rows=5) }}
-            <span class="uk-text-small uk-text-muted"></span>
+        <div class="uk-margin">
+            {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
         </div>
-    </div>
 
-    <div class="uk-margin">
-        <label class="uk-form-label">{{ form.decisions.label }}</label>
-        <div class="uk-form-controls">
-            {{ form.decisions(class='uk-textarea uk-border-rounded', rows=8) }}
-            <span class="uk-text-small uk-text-muted"></span>
-        </div>
-    </div>
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const textarea = document.getElementById('decisions');
+            const tagButtons = document.querySelectorAll('.tag-btn');
 
-    <div class="uk-margin">
-        <label class="uk-form-label">{{ form.protocol_file.label }}:</label>
-        <div uk-form-custom>
-            &ensp;{{ form.protocol_file(class='uk-file uk-border-rounded') }}
-            <button class="uk-button uk-button-default uk-border-rounded" type="button" tabindex="-1">Выбрать файл
-                протокола</button>
-        </div>
-    </div>
+            // Функция для вставки тега в позицию курсора
+            function insertTagAtCursor(tag) {
+                if (!textarea) {
+                    // Если курсор не в textarea, добавляем в конец
+                    textarea.value += '\n' + tag;
+                    textarea.focus();
+                    return;
+                }
 
-    <div class="uk-margin">
-        {{ form.submit(class='uk-button uk-button-primary uk-border-rounded') }}
-    </div>
+                try {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = textarea.value;
 
-</form>
+                    // Вставляем тег в позицию курсора
+                    textarea.value = text.substring(0, start) + tag + text.substring(end);
 
-{% endblock %}
+                    // Устанавливаем курсор после вставленного тега
+                    textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+
+                    // Фокусируем обратно на textarea
+                    textarea.focus();
+
+                } catch (error) {
+                    // Если что-то пошло не так, добавляем в конец
+                    console.error('Ошибка вставки:', error);
+                    textarea.value += '\n' + tag;
+                    textarea.focus();
+                }
+            }
+
+            // Обработчики для кнопок тегов
+            tagButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const tag = this.getAttribute('data-tag');
+                    insertTagAtCursor(tag);
+                });
+            });
+
+
+        });
+    </script>
+    {% endblock %}
