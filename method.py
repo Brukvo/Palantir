@@ -58,7 +58,7 @@ def protocol_view(id):
     protocol = MethodAssemblyProtocol.query.get_or_404(id)
     protocol = render_protocol(protocol)
     form = MethodProtocolUploadForm()
-    return render_template('methodic/protocol_view.html', protocol=protocol, title=f'Протокол методического заседания №{protocol.number} от {protocol.date.strftime("%d.%m.%Y")}', form=form)
+    return render_template('methodic/protocol_view.html', protocol=protocol, title=f'Протокол заседания методического объединения №{protocol.number} от {protocol.date.strftime("%d.%m.%Y")}', form=form)
 
 @bp.route('/protocol/<int:id>/upload', methods=['GET', 'POST'])
 def protocol_upload(id):

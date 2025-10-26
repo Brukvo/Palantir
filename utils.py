@@ -804,17 +804,18 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
                 if tag_type == 'все_события':
                     print('Все события:', parsed_tag)
                     rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    rendered_text += html_events('все', None)
                     
                 elif tag_type == 'события':
                     if parsed_tag['event_type'].isdigit():
                         event_type = 'все'
                         term = int(parsed_tag['event_type'])
-                        rendered_text += f'{i}. {remove_tags(decision)}'
                     else:
                         event_type = parsed_tag['event_type'] or 'все'
                         term = int(parsed_tag['term']) if parsed_tag['term'] else None
                         # doc = doc_events_stats(doc, event_type, term)
-                        rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    rendered_text += html_events(event_type, term)
                     
                 elif tag_type == 'успеваемость':
                     if parsed_tag['dep_name'].isdigit():
@@ -829,10 +830,8 @@ def render_protocol(protocol: MethodAssemblyProtocol, to_doc=False):
                         Department.title.ilike(f'%{dep_name}%')
                     ).first()
                     
-                    if dep is not None:
-                        rendered_text += f'{i}. {remove_tags(decision)}<br>'
-                    else:
-                        rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    rendered_text += f'{i}. {remove_tags(decision)}<br>'
+                    rendered_text += html_dep_report(dep if dep else 'все', term)
         
         protocol.decisions = rendered_text
         return protocol
@@ -1012,3 +1011,155 @@ def doc_exams(doc: Document, exam_type: str, term: int=None):
             exam_block.add_run(f'Количественная успеваемость: {exam.quantity}%\nКачественная успеваемость: {exam.quality}%')
             
     return doc
+
+def html_events(event_type: str, term: int):
+    academic_year = get_academic_year()
+    event_types = {
+        'концерты': [Concert.query],
+        'конкурсы': [Contest.query],
+        'все': [Concert.query, Contest.query]
+    }
+    events = []
+    if term:
+        for ev_type in event_types[event_type]:
+            events.extend(ev_type.filter_by(term=term, academic_year=academic_year).all())
+    else:
+        for ev_type in event_types[event_type]:
+            events.extend(ev_type.filter_by(academic_year=academic_year).all())
+
+    rendered_text = '<ul>'
+    for event in events:
+        rendered_text += f'<li>{event.title} ({event.date.strftime("%d.%m.%Y")}, {event.place}). Принимали участие:<ul class="uk-margin-remove">'
+        if isinstance(event, Concert):
+            for participation in event.participations:
+                if participation.student_id:
+                    rendered_text += f'<li>{participation.student.short_name}, {participation.student.class_level}/{participation.student.study_years} (кл. преп.: {participation.student.lead_teacher.short_name})</li>'
+                if participation.ensemble_id:
+                    rendered_text += f'<li>{participation.ensemble.name} (рук. {participation.ensemble.teacher.short_name})</li>'
+        if isinstance(event, Contest):
+            for part in event.participations:
+                if part.student_id:
+                    rendered_text += f'<li>{part.student.short_name}, {part.student.class_level}/{part.student.study_years} (кл. преп.: {part.student.lead_teacher.short_name}) — {part.result}</li>'
+                if part.ensemble_id:
+                    rendered_text += f'<li>{part.ensemble.name} (рук. {part.ensemble.teacher.short_name}) — {part.result}</li>'
+        rendered_text += '</ul>'
+    return rendered_text + '</ul>'
+
+def html_dep_report(dep: Department='все', term: int=None):
+    academic_year = get_academic_year()
+    if isinstance(dep, str):
+        reports = DepartmentReportItem.query.filter_by(academic_year=academic_year, term=term).all()
+    else:
+        reports = DepartmentReportItem.query.filter_by(academic_year=academic_year, term=term, department_id=dep.id).all()
+
+    if not reports:
+        return ''
+    
+    text = ''
+    for report in reports:
+        text += f'<span class="uk-text-bold">{report.department.title.upper()}</span><br>'
+        if report.term in [1, 2, 3, 4]:
+            text += f'Всего на отделении обучающихся: {len(report.department.students)}, из них {term} четверть окончили:<ul class="uk-margin-remove">'
+        else:
+            text += f'<span class="uk-text-italic">Результаты {academic_year} учебного года</span><br>'
+            text += f'Всего на отделении обучающихся: {len(report.department.students)}, из них учебный год окончили:<ul class="uk-margin-remove">'
+
+        if report.got_best:
+            text += f'<li> отлично: {report.got_best}</li>'
+        if report.got_good:
+            text += f'<li> хорошо: {report.got_good}</li>'
+        if report.got_avg:
+            text += f'<li> удовлетворительно: {report.got_avg}</li>'
+        if report.got_bad:
+            text += f'<li> неудовлетворительно: {report.got_bad}</li>'
+        text += '</li></ul>'
+        text += f'Количественная успеваемость: {report.quantity}%<br>Качественная успеваемость: {report.quality}%<br><br>'
+
+        teachers = report.department.teachers
+        for teacher in teachers:
+            text += f'<u>Преподаватель: {teacher.short_name}</u><br>'
+            s_reports = ReportItem.query.filter_by(academic_year=academic_year, term=term, teacher_id=teacher.id).all()
+            if not s_reports:
+                text += 'Отсутствуют отчёты по предметам!<br>'
+            else:
+                for s_report in s_reports:
+                    text += f'<i>Предмет "{s_report.subject.title}"</i><br>'
+                    text += f'Всего обучающихся: {s_report.total}, из них:<ul class="uk-margin-remove">'
+                    if s_report.got_best:
+                        text += f'<li>отлично: {s_report.got_best}</li>'
+                    if s_report.got_good:
+                        text += f'<li>хорошо: {s_report.got_good}</li>'
+                    if s_report.got_avg:
+                        text += f'<li>удовлетворительно: {s_report.got_avg}</li>'
+                    if s_report.got_bad:
+                        text += f'<li>неудовлетворительно: {s_report.got_bad}</li>'
+                    text += f'</ul>Количественная успеваемость: {s_report.quantity}%<br>Качественная успеваемость: {s_report.quality}%<br>'
+            
+            c_reports = ClassReportItem.query.filter_by(academic_year=academic_year, term=term, teacher_id=teacher.id).all()
+            if c_reports:
+                for c_report in c_reports:
+                    if c_report.term in [1, 2, 3, 4]:
+                        # c_r_block.add_run(f'\tРезультаты {c_report.term} четверти')
+                        text += f'<br>Обучающихся в классе преподавателя: {c_report.total}, из них {c_report.term} четверть окончили:<ul class="uk-margin-remove">'
+                    else:
+                        text += f'<i>Результаты {academic_year} учебного года</i><br>'
+                        text += f'Обучающихся в классе преподавателя: {c_report.total}, из них:<ul>'
+                    if c_report.got_best:
+                        text += f'<li>отлично: {c_report.got_best}</li>'
+                    if c_report.got_good:
+                        text += f'<li>хорошо: {c_report.got_good}</li>'
+                    if c_report.got_avg:
+                        text += f'<li>удовлетворительно: {c_report.got_avg}</li>'
+                    if c_report.got_bad:
+                        text += f'<li>неудовлетворительно: {c_report.got_bad}</li>'
+                    text += f'</li></ul>Количественная успеваемость: {c_report.quantity}%<br>Качественная успеваемость: {c_report.quality}%<br><br>'
+    if dep == 'все':
+        for teacher in Teacher.query.filter_by(main_department_id=0).all():
+            text += f'<u>Преподаватель: {teacher.short_name}</u><br>'
+            # text += f'Всего обучающихся: {Student.query.filter_by(status_id=1).count()}<br>'
+            reports = ReportItem.query.filter_by(teacher_id=teacher.id, term=term).all()
+            if reports:
+                for report in reports:
+                    text += f'<i>Предмет "{report.subject.title}"</i><br>'
+                    if report.term in [1, 2, 3, 4]:
+                        text += f'Результаты {report.term} четверти<br>'
+                    else:
+                        text += f'Результаты {academic_year} учебного года<br>'
+                    text += f'Всего обучающихся: {report.total}, из них:<ul class="uk-margin-remove">'
+                    if report.got_best:
+                        text += f'<li>— отлично: {report.got_best}</li>'
+                    if report.got_good:
+                        text += f'<li>— хорошо: {report.got_good}</li>'
+                    if report.got_avg:
+                        text += f'<li>— удовлетворительно: {report.got_avg}</li>'
+                    if report.got_bad:
+                        text += f'<li>— неудовлетворительно: {report.got_bad}</li>'
+                    text += f'</ul>Количественная успеваемость: {report.quantity}%<br>Качественная успеваемость: {report.quality}%<br><br>'
+            else:
+                text += 'Нет отчётов по преподаваемым предметам!<br>'
+    return text
+
+def html_exams(exam_type: str, term: int=None):
+    e_types = [et.id for et in ExamType.query.filter(ExamType.name.ilike(f'%{exam_type}%')).all()]
+    query = Exam.query.filter(Exam.exam_type_id.in_(e_types))
+    if term is not None:
+        query = query.filter(Exam.term == term)
+    exams = query.all()
+
+    text = ''
+    if exams:
+        for exam in exams:
+            text += f'<span class="uk-text-italic">{exam.exam_type.name.capitalize()}, результаты</span><br>Всего сдавало обучающихся: {exam.total}, из них:<ul class="uk-margin-remove">'
+            if exam.got_best:
+                text += f'<li>отлично: {exam.got_best}</li>'
+            if exam.got_good:
+                text += f'<li>хорошо: {exam.got_good}</li>'
+            if exam.got_avg:
+                text += f'<li>удовлетворительно: {exam.got_avg}</li>'
+            if exam.got_bad:
+                text += f'<li>неудовлетворительно: {exam.got_bad}</li>'
+            if exam.got_nothing:
+                text += f'<li>не сдавало: {exam.got_nothing}</li>'
+            text += f'Количественная успеваемость: {exam.quantity}%<br>Качественная успеваемость: {exam.quality}%'
+            
+    return text
